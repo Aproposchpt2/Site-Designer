@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{SITE_TITLE}} — {{SITE_TAGLINE}}</title>
+  <meta name="description" content="{{META_DESCRIPTION}}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --bg2: #f2f0eb;
+      --ink: #0f0e0a;
+      --text: #4a4740;
+      --muted: #8a8680;
+      --soft: #c8c4bc;
+      --line: rgba(0,0,0,.08);
+      --line2: rgba(0,0,0,.16);
+      --accent: #e85d04;
+      --accent2: #f48c06;
+      --dark: #0f0e0a;
+      --surface: rgba(255,255,255,.8);
+      --display: 'Instrument Serif', serif;
+      --sans: 'DM Sans', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 18px;
+      --radius-lg: 28px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    /* ── NOISE TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    .page { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: clamp(3rem,8vw,6rem) clamp(1.5rem,7vw,6rem);
+      border-bottom: 1px solid var(--line2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Large decorative number */
+    .hero::after {
+      content: '01';
+      position: absolute;
+      right: -2rem;
+      bottom: -3rem;
+      font-family: var(--display);
+      font-size: clamp(12rem, 28vw, 26rem);
+      font-weight: 400;
+      font-style: italic;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(0,0,0,.06);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      margin-bottom: clamp(3rem,7vw,5rem);
+    }
+
+    .logo-wrap img { height: 42px; width: auto; }
+
+    .launch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: var(--mono);
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(232,93,4,.07);
+      border: 1px solid rgba(232,93,4,.2);
+      padding: .5rem 1rem;
+      border-radius: 999px;
+    }
+    .launch-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: blink 1.8s ease infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Main headline area */
+    .hero-headline {
+      max-width: 1100px;
+    }
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(3.5rem,9vw,9rem);
+      font-weight: 400;
+      line-height: .9;
+      letter-spacing: -.03em;
+      color: var(--ink);
+      margin-bottom: 2rem;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: end;
+      padding-top: 2rem;
+      border-top: 1px solid var(--line2);
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem,1.5vw,1.2rem);
+      color: var(--text);
+      line-height: 1.75;
+      max-width: 560px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      border-radius: 999px;
+      font-weight: 700;
+      padding: 1rem 1.8rem;
+      font-size: .94rem;
+      transition: .18s ease;
+      cursor: pointer;
+      font-family: var(--sans);
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: var(--bg);
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    }
+    .btn-primary:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,93,4,.35); }
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--line2);
+      color: var(--ink);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Benefit chips */
+    .benefit-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .8rem;
+    }
+    .chip {
+      font-family: var(--mono);
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--bg2);
+      border: 1px solid var(--line2);
+      border-radius: 999px;
+      padding: .38rem .85rem;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      padding: clamp(3.5rem,7vw,6rem) clamp(1.5rem,7vw,6rem);
+      border-bottom: 1px solid var(--line);
+    }
+    .inner { max-width: 1180px; margin: 0 auto; }
+    .section-kicker {
+      font-family: var(--mono);
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .85rem;
+    }
+    h2 {
+      font-family: var(--display);
+      font-size: clamp(2rem,4.5vw,4rem);
+      font-weight: 400;
+      line-height: 1.02;
+      color: var(--ink);
+      margin-bottom: 1rem;
+      letter-spacing: -.03em;
+    }
+    h2 em { font-style: italic; color: var(--accent); }
+    .section-copy {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.8;
+      max-width: 700px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── FEATURE GRID ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .feature-card {
+      background: var(--bg);
+      padding: 2rem 1.8rem;
+      transition: .18s;
+    }
+    .feature-card:hover { background: var(--bg2); }
+    .feature-icon { font-size: 1.7rem; margin-bottom: 1.1rem; }
+    .feature-card h3 {
+      font-family: var(--display);
+      font-size: 1.22rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: .55rem;
+    }
+    .feature-card p { font-size: .9rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── BENEFIT PANELS ── */
+    .benefit-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .benefit-panel {
+      border: 1px solid var(--line2);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+    }
+    .benefit-panel.dark {
+      background: var(--dark);
+      border-color: rgba(255,255,255,.08);
+    }
+    .benefit-panel.dark h3,
+    .benefit-panel.dark .benefit-list li { color: #f0ece5; }
+    .benefit-panel.dark p { color: rgba(240,236,229,.55); }
+    .benefit-panel h3 {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: .6rem;
+    }
+    .benefit-panel > p { font-size: .92rem; color: var(--muted); margin-bottom: 1.2rem; line-height: 1.65; }
+    .benefit-list { list-style: none; display: grid; gap: .55rem; }
+    .benefit-list li {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      font-size: .9rem;
+      color: var(--text);
+    }
+    .benefit-list li::before {
+      content: '→';
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline {
+      display: grid;
+      gap: 1px;
+      border: 1px solid var(--line2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--line);
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 52px 1fr 90px;
+      gap: 1rem;
+      align-items: center;
+      padding: 1.3rem 1.6rem;
+      background: var(--bg);
+      transition: .18s;
+    }
+    .step:hover { background: var(--bg2); }
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: .65rem;
+    }
+    .step strong { display: block; color: var(--ink); font-size: .95rem; }
+    .step span { display: block; color: var(--muted); font-size: .86rem; line-height: 1.5; }
+    .step-badge {
+      font-family: var(--mono);
+      font-size: .56rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: right;
+    }
+
+    /* ── PRICING CARDS ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1rem;
+    }
+    .pricing-card {
+      border: 1px solid var(--line2);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 2rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .pricing-card.featured {
+      background: var(--dark);
+      border-color: var(--accent);
+      box-shadow: 0 20px 60px rgba(232,93,4,.18);
+    }
+    .pricing-card.featured * { color: #f0ece5 !important; }
+    .plan-name {
+      font-family: var(--mono);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .8rem;
+    }
+    .plan-price {
+      font-family: var(--display);
+      font-size: 3.2rem;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: .3rem;
+    }
+    .plan-period { font-size: .85rem; color: var(--muted); margin-bottom: 1.4rem; }
+    .plan-features { list-style: none; display: grid; gap: .5rem; margin-bottom: 1.6rem; flex: 1; }
+    .plan-features li {
+      display: flex;
+      gap: .6rem;
+      font-size: .88rem;
+      color: var(--text);
+    }
+    .plan-features li::before { content: '✓'; color: var(--accent); font-weight: 900; }
+    .plan-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      border-radius: 999px;
+      font-weight: 700;
+      padding: .85rem 1.4rem;
+      font-size: .88rem;
+      background: var(--ink);
+      color: var(--bg);
+      transition: .18s;
+      text-align: center;
+    }
+    .pricing-card.featured .plan-cta {
+      background: var(--accent);
+      color: white;
+    }
+    .plan-cta:hover { transform: translateY(-2px); }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: clamp(4rem,8vw,7rem) clamp(1.5rem,7vw,6rem);
+    }
+    .cta-panel {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--dark);
+      border-radius: 36px;
+      padding: clamp(3rem,6vw,5rem);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 3rem;
+    }
+    .cta-panel h2 {
+      font-size: clamp(2rem,4vw,3.8rem);
+      color: #f0ece5;
+      margin-bottom: .8rem;
+    }
+    .cta-panel h2 em { color: var(--accent); }
+    .cta-panel p { color: rgba(240,236,229,.55); font-size: 1rem; line-height: 1.8; max-width: 540px; }
+    .cta-actions { display: flex; flex-direction: column; gap: .8rem; align-items: center; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1.8rem clamp(1.5rem,7vw,6rem);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .84rem;
+    }
+    .footer-links { display: flex; gap: 1.2rem; }
+    .footer-links a { color: var(--accent); font-weight: 600; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:1020px) {
+      .hero-bottom { grid-template-columns: 1fr; }
+      .hero-actions { align-items: flex-start; }
+      .feature-grid { grid-template-columns: repeat(2,1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width:420px; }
+      .benefit-layout { grid-template-columns: 1fr; }
+      .cta-panel { grid-template-columns: 1fr; }
+      .cta-actions { align-items: flex-start; }
+    }
+    @media (max-width:680px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 44px 1fr; }
+      .step-badge { display: none; }
+      h1 { font-size: clamp(3rem,16vw,5rem); }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .hero-top { animation: fadeUp .5s ease both; }
+    .hero-headline { animation: fadeUp .6s .1s ease both; }
+    .hero-bottom { animation: fadeUp .6s .25s ease both; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <main>
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-top">
+          <div class="logo-wrap">
+            <img src="{{LOGO_URL}}" alt="{{SITE_TITLE}} logo" />
+          </div>
+          <div class="launch-badge">{{LAUNCH_BADGE_TEXT}}</div>
+        </div>
+
+        <div class="hero-headline">
+          <h1>{{HERO_HEADLINE_LINE1}}<br><em>{{HERO_HEADLINE_LINE2}}</em></h1>
+        </div>
+
+        <div class="hero-bottom">
+          <div>
+            <p class="hero-sub">{{HERO_SUBHEADLINE}}</p>
+            <div class="benefit-chips">
+              <span class="chip">{{TAG_1}}</span>
+              <span class="chip">{{TAG_2}}</span>
+              <span class="chip">{{TAG_3}}</span>
+              <span class="chip">{{TAG_4}}</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="{{CTA_PRIMARY_URL}}">{{CTA_PRIMARY_LABEL}}</a>
+            <a class="btn btn-secondary" href="{{CTA_SECONDARY_URL}}">{{CTA_SECONDARY_LABEL}}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{FEATURES_KICKER}}</div>
+        <h2>{{FEATURES_HEADLINE}}</h2>
+        <p class="section-copy">{{FEATURES_COPY}}</p>
+        <div class="feature-grid">
+          <article class="feature-card"><div class="feature-icon">{{FEATURE_1_ICON}}</div><h3>{{FEATURE_1_TITLE}}</h3><p>{{FEATURE_1_DESC}}</p></article>
+          <article class="feature-card"><div class="feature-icon">{{FEATURE_2_ICON}}</div><h3>{{FEATURE_2_TITLE}}</h3><p>{{FEATURE_2_DESC}}</p></article>
+          <article class="feature-card"><div class="feature-icon">{{FEATURE_3_ICON}}</div><h3>{{FEATURE_3_TITLE}}</h3><p>{{FEATURE_3_DESC}}</p></article>
+          <article class="feature-card"><div class="feature-icon">{{FEATURE_4_ICON}}</div><h3>{{FEATURE_4_TITLE}}</h3><p>{{FEATURE_4_DESC}}</p></article>
+          <article class="feature-card"><div class="feature-icon">{{FEATURE_5_ICON}}</div><h3>{{FEATURE_5_TITLE}}</h3><p>{{FEATURE_5_DESC}}</p></article>
+          <article class="feature-card"><div class="feature-icon">{{FEATURE_6_ICON}}</div><h3>{{FEATURE_6_TITLE}}</h3><p>{{FEATURE_6_DESC}}</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BENEFITS ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{BENEFITS_KICKER}}</div>
+        <h2>{{BENEFITS_HEADLINE}}</h2>
+        <p class="section-copy">{{BENEFITS_COPY}}</p>
+        <div class="benefit-layout">
+          <div class="benefit-panel">
+            <h3>{{BENEFIT_PANEL_1_TITLE}}</h3>
+            <p>{{BENEFIT_PANEL_1_DESC}}</p>
+            <ul class="benefit-list">
+              <li>{{BENEFIT_1_A}}</li>
+              <li>{{BENEFIT_1_B}}</li>
+              <li>{{BENEFIT_1_C}}</li>
+              <li>{{BENEFIT_1_D}}</li>
+            </ul>
+          </div>
+          <div class="benefit-panel dark">
+            <h3>{{BENEFIT_PANEL_2_TITLE}}</h3>
+            <p>{{BENEFIT_PANEL_2_DESC}}</p>
+            <ul class="benefit-list">
+              <li>{{BENEFIT_2_A}}</li>
+              <li>{{BENEFIT_2_B}}</li>
+              <li>{{BENEFIT_2_C}}</li>
+              <li>{{BENEFIT_2_D}}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── WORKFLOW ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{WORKFLOW_KICKER}}</div>
+        <h2>{{WORKFLOW_HEADLINE}}</h2>
+        <p class="section-copy">{{WORKFLOW_COPY}}</p>
+        <div class="pipeline">
+          <div class="step"><div class="step-num">01</div><div><strong>{{WF_1_TITLE}}</strong><span>{{WF_1_DESC}}</span></div><div class="step-badge">{{WF_1_BADGE}}</div></div>
+          <div class="step"><div class="step-num">02</div><div><strong>{{WF_2_TITLE}}</strong><span>{{WF_2_DESC}}</span></div><div class="step-badge">{{WF_2_BADGE}}</div></div>
+          <div class="step"><div class="step-num">03</div><div><strong>{{WF_3_TITLE}}</strong><span>{{WF_3_DESC}}</span></div><div class="step-badge">{{WF_3_BADGE}}</div></div>
+          <div class="step"><div class="step-num">04</div><div><strong>{{WF_4_TITLE}}</strong><span>{{WF_4_DESC}}</span></div><div class="step-badge">{{WF_4_BADGE}}</div></div>
+          <div class="step"><div class="step-num">05</div><div><strong>{{WF_5_TITLE}}</strong><span>{{WF_5_DESC}}</span></div><div class="step-badge">{{WF_5_BADGE}}</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PRICING ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{PRICING_KICKER}}</div>
+        <h2>{{PRICING_HEADLINE}}</h2>
+        <p class="section-copy">{{PRICING_COPY}}</p>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <div class="plan-name">{{PLAN_1_NAME}}</div>
+            <div class="plan-price">{{PLAN_1_PRICE}}</div>
+            <div class="plan-period">{{PLAN_1_PERIOD}}</div>
+            <ul class="plan-features">
+              <li>{{PLAN_1_FEAT_1}}</li><li>{{PLAN_1_FEAT_2}}</li><li>{{PLAN_1_FEAT_3}}</li><li>{{PLAN_1_FEAT_4}}</li>
+            </ul>
+            <a class="plan-cta" href="{{PLAN_1_URL}}">{{PLAN_1_CTA}}</a>
+          </div>
+          <div class="pricing-card featured">
+            <div class="plan-name">{{PLAN_2_NAME}}</div>
+            <div class="plan-price">{{PLAN_2_PRICE}}</div>
+            <div class="plan-period">{{PLAN_2_PERIOD}}</div>
+            <ul class="plan-features">
+              <li>{{PLAN_2_FEAT_1}}</li><li>{{PLAN_2_FEAT_2}}</li><li>{{PLAN_2_FEAT_3}}</li><li>{{PLAN_2_FEAT_4}}</li>
+            </ul>
+            <a class="plan-cta" href="{{PLAN_2_URL}}">{{PLAN_2_CTA}}</a>
+          </div>
+          <div class="pricing-card">
+            <div class="plan-name">{{PLAN_3_NAME}}</div>
+            <div class="plan-price">{{PLAN_3_PRICE}}</div>
+            <div class="plan-period">{{PLAN_3_PERIOD}}</div>
+            <ul class="plan-features">
+              <li>{{PLAN_3_FEAT_1}}</li><li>{{PLAN_3_FEAT_2}}</li><li>{{PLAN_3_FEAT_3}}</li><li>{{PLAN_3_FEAT_4}}</li>
+            </ul>
+            <a class="plan-cta" href="{{PLAN_3_URL}}">{{PLAN_3_CTA}}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section class="cta-section">
+      <div class="cta-panel">
+        <div>
+          <div class="section-kicker" style="color:rgba(232,93,4,.8)">{{CTA_KICKER}}</div>
+          <h2>{{CTA_HEADLINE}}<br><em>{{CTA_HEADLINE_2}}</em></h2>
+          <p>{{CTA_COPY}}</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="{{CTA_PRIMARY_URL}}" style="background:var(--accent);color:white;white-space:nowrap">{{CTA_PRIMARY_LABEL}}</a>
+          <a class="btn btn-secondary" href="{{CTA_SECONDARY_URL}}" style="border-color:rgba(255,255,255,.15);color:rgba(240,236,229,.6)">{{CTA_SECONDARY_LABEL}}</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>© {{YEAR}} {{BUSINESS_NAME}} · {{FOOTER_TAGLINE}}</div>
+    <div class="footer-links">
+      <a href="{{FOOTER_LINK_1_URL}}">{{FOOTER_LINK_1_LABEL}}</a>
+      <a href="{{FOOTER_LINK_2_URL}}">{{FOOTER_LINK_2_LABEL}}</a>
+      <a href="{{FOOTER_LINK_3_URL}}">{{FOOTER_LINK_3_LABEL}}</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{SITE_TITLE}} — {{SITE_TAGLINE}}</title>
+  <meta name="description" content="{{META_DESCRIPTION}}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #111109;
+      --surface: rgba(20,20,16,.9);
+      --ink: #f5f2e8;
+      --text: #a09880;
+      --muted: #5a5545;
+      --line: rgba(255,248,220,.07);
+      --line2: rgba(255,248,220,.14);
+      --gold: #c9a84c;
+      --gold2: #e8c96c;
+      --cream: #f5f2e8;
+      --display: 'Playfair Display', serif;
+      --sans: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 4px;
+      --radius-lg: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    /* ── TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,.08), transparent 60%),
+        radial-gradient(ellipse 30% 30% at 100% 50%, rgba(201,168,76,.04), transparent 55%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    .page { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 0 clamp(1.5rem,7vw,6rem);
+      border-bottom: 1px solid var(--line2);
+    }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .top-bar-logo img { height: 36px; width: auto; }
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .top-bar-tag {
+      font-family: var(--mono);
+      font-size: .58rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .top-bar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--line2);
+    }
+    .contact-link {
+      font-size: .85rem;
+      color: var(--text);
+      font-weight: 500;
+      transition: .18s;
+    }
+    .contact-link:hover { color: var(--gold); }
+
+    /* ── HERO MAIN ── */
+    .hero-main {
+      display: grid;
+      grid-template-columns: 1fr .7fr;
+      gap: clamp(2rem,6vw,5rem);
+      align-items: center;
+      padding: clamp(3rem,8vw,6rem) 0;
+    }
+
+    .credential-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .gold-line { width: 40px; height: 1px; background: var(--gold); }
+    .credential-text {
+      font-family: var(--mono);
+      font-size: .58rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(3rem,7vw,7rem);
+      font-weight: 400;
+      line-height: .92;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      margin-bottom: 1.6rem;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: clamp(.98rem,1.3vw,1.12rem);
+      color: var(--text);
+      max-width: 580px;
+      line-height: 1.82;
+      margin-bottom: 2rem;
+    }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: .85rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 600;
+      padding: .95rem 1.8rem;
+      font-size: .88rem;
+      transition: .2s ease;
+      cursor: pointer;
+      font-family: var(--sans);
+      letter-spacing: .01em;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: #0a0a08;
+      border-radius: 2px;
+    }
+    .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--line2);
+      color: var(--ink);
+      border-radius: 2px;
+    }
+    .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Credentials card */
+    .cred-card {
+      border: 1px solid var(--line2);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cred-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .cred-logo { margin-bottom: 1.4rem; }
+    .cred-logo img { height: 32px; }
+    .cred-label {
+      font-family: var(--mono);
+      font-size: .55rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .6rem;
+    }
+    .cred-title {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin-bottom: .35rem;
+    }
+    .cred-sub { font-size: .86rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+
+    .trust-items { display: grid; gap: .65rem; }
+    .trust-item {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      padding: .8rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.02);
+    }
+    .trust-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .trust-item strong { display: block; color: var(--ink); font-size: .86rem; margin-bottom: .15rem; }
+    .trust-item span { display: block; color: var(--muted); font-size: .78rem; line-height: 1.45; }
+
+    /* ── HERO BOTTOM ── */
+    .hero-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.6rem 0;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+    .stat-row { display: flex; gap: 2.5rem; }
+    .stat { }
+    .stat-val {
+      font-family: var(--display);
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .stat-label { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+    .stat-divider { width: 1px; background: var(--line2); align-self: stretch; }
+
+    /* ── SECTIONS ── */
+    .section {
+      padding: clamp(3.5rem,7vw,6rem) clamp(1.5rem,7vw,6rem);
+      border-bottom: 1px solid var(--line);
+    }
+    .inner { max-width: 1180px; margin: 0 auto; }
+
+    .section-kicker {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: var(--mono);
+      font-size: .58rem;
+      font-weight: 500;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .section-kicker::before { content: ''; flex: 0 0 28px; height: 1px; background: var(--gold); }
+
+    h2 {
+      font-family: var(--display);
+      font-size: clamp(2rem,4vw,3.8rem);
+      font-weight: 400;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    h2 em { font-style: italic; color: var(--gold); }
+    .section-copy {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.8;
+      max-width: 700px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── EXPERTISE GRID ── */
+    .expertise-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1px;
+      background: var(--line2);
+      border: 1px solid var(--line2);
+    }
+    .expertise-card {
+      background: var(--bg);
+      padding: 2rem 1.8rem;
+      transition: .2s;
+      border-radius: 0;
+    }
+    .expertise-card:hover { background: var(--bg2); }
+    .expertise-num {
+      font-family: var(--mono);
+      font-size: .56rem;
+      letter-spacing: .16em;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .expertise-card h3 {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: .6rem;
+    }
+    .expertise-card p { font-size: .88rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── PROCESS ── */
+    .process-list { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line2); }
+    .process-step {
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      gap: 1.5rem;
+      align-items: center;
+      padding: 1.5rem 1.8rem;
+      background: var(--bg);
+      transition: .18s;
+    }
+    .process-step:hover { background: var(--bg2); }
+    .process-num-wrap { text-align: center; }
+    .process-num {
+      font-family: var(--display);
+      font-size: 2.2rem;
+      font-style: italic;
+      color: var(--gold);
+      opacity: .4;
+      line-height: 1;
+    }
+    .process-step strong { display: block; color: var(--ink); font-size: 1rem; margin-bottom: .3rem; }
+    .process-step span { display: block; color: var(--muted); font-size: .88rem; line-height: 1.6; }
+    .process-badge {
+      font-family: var(--mono);
+      font-size: .54rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: .7;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* ── TESTIMONIALS ── */
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1.2rem;
+    }
+    .testimonial-card {
+      border: 1px solid var(--line2);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 1.8rem;
+    }
+    .quote-mark {
+      font-family: var(--display);
+      font-size: 3rem;
+      font-style: italic;
+      color: var(--gold);
+      opacity: .3;
+      line-height: 1;
+      margin-bottom: .5rem;
+    }
+    .testimonial-text {
+      font-size: .92rem;
+      color: var(--text);
+      line-height: 1.75;
+      margin-bottom: 1.2rem;
+      font-style: italic;
+    }
+    .testimonial-author { border-top: 1px solid var(--line); padding-top: .9rem; }
+    .author-name { color: var(--ink); font-size: .88rem; font-weight: 600; }
+    .author-role { color: var(--muted); font-size: .78rem; margin-top: .15rem; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: clamp(4rem,8vw,7rem) clamp(1.5rem,7vw,6rem);
+    }
+    .cta-panel {
+      max-width: 980px;
+      margin: 0 auto;
+      border: 1px solid var(--line2);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: clamp(3rem,5vw,4.5rem);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .cta-panel h2 { font-size: clamp(2rem,4vw,3.8rem); margin-bottom: .9rem; }
+    .cta-panel p { max-width: 600px; margin: 0 auto 2rem; font-size: 1rem; line-height: 1.8; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1.8rem clamp(1.5rem,7vw,6rem);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+    }
+    .footer-links { display: flex; gap: 1.4rem; }
+    .footer-links a { color: var(--gold); font-weight: 500; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:1020px) {
+      .hero-main { grid-template-columns: 1fr; }
+      .expertise-grid { grid-template-columns: repeat(2,1fr); }
+      .testimonial-grid { grid-template-columns: 1fr; max-width: 540px; }
+    }
+    @media (max-width:680px) {
+      .expertise-grid { grid-template-columns: 1fr; }
+      .stat-row { gap: 1.5rem; }
+      .process-step { grid-template-columns: 44px 1fr; }
+      .process-badge { display: none; }
+      h1 { font-size: clamp(2.8rem,14vw,4.5rem); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .top-bar { animation: fadeUp .5s ease both; }
+    .hero-main { animation: fadeUp .6s .1s ease both; }
+    .hero-bottom { animation: fadeUp .5s .3s ease both; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <main>
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+      <div class="top-bar">
+        <div class="top-bar-logo">
+          <img src="{{LOGO_URL}}" alt="{{SITE_TITLE}} logo" />
+        </div>
+        <div class="top-bar-right">
+          <span class="top-bar-tag">{{TOP_BAR_TAG}}</span>
+          <div class="top-bar-divider"></div>
+          <a class="contact-link" href="{{CTA_PRIMARY_URL}}">{{TOP_BAR_CTA}}</a>
+        </div>
+      </div>
+
+      <div class="hero-main">
+        <div>
+          <div class="credential-row">
+            <div class="gold-line"></div>
+            <div class="credential-text">{{EYEBROW_TEXT}}</div>
+          </div>
+          <h1>{{HERO_HEADLINE_LINE1}}<br><em>{{HERO_HEADLINE_LINE2}}</em></h1>
+          <p class="hero-sub">{{HERO_SUBHEADLINE}}</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="{{CTA_PRIMARY_URL}}">{{CTA_PRIMARY_LABEL}}</a>
+            <a class="btn btn-secondary" href="{{CTA_SECONDARY_URL}}">{{CTA_SECONDARY_LABEL}}</a>
+          </div>
+        </div>
+
+        <aside class="cred-card">
+          <div class="cred-logo"><img src="{{LOGO_URL}}" alt="Logo" /></div>
+          <div class="cred-label">{{PANEL_KICKER}}</div>
+          <div class="cred-title">{{PANEL_TITLE}}</div>
+          <p class="cred-sub">{{PANEL_DESCRIPTION}}</p>
+          <div class="trust-items">
+            <div class="trust-item"><div class="trust-icon">{{TRUST_1_ICON}}</div><div><strong>{{TRUST_1_TITLE}}</strong><span>{{TRUST_1_DESC}}</span></div></div>
+            <div class="trust-item"><div class="trust-icon">{{TRUST_2_ICON}}</div><div><strong>{{TRUST_2_TITLE}}</strong><span>{{TRUST_2_DESC}}</span></div></div>
+            <div class="trust-item"><div class="trust-icon">{{TRUST_3_ICON}}</div><div><strong>{{TRUST_3_TITLE}}</strong><span>{{TRUST_3_DESC}}</span></div></div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="hero-bottom">
+        <div class="stat-row">
+          <div class="stat">
+            <div class="stat-val">{{STAT_1_VAL}}</div>
+            <div class="stat-label">{{STAT_1_LABEL}}</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-val">{{STAT_2_VAL}}</div>
+            <div class="stat-label">{{STAT_2_LABEL}}</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-val">{{STAT_3_VAL}}</div>
+            <div class="stat-label">{{STAT_3_LABEL}}</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">{{HERO_BOTTOM_TAG}}</div>
+      </div>
+    </section>
+
+    <!-- ── EXPERTISE ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{FEATURES_KICKER}}</div>
+        <h2>{{FEATURES_HEADLINE}}</h2>
+        <p class="section-copy">{{FEATURES_COPY}}</p>
+        <div class="expertise-grid">
+          <article class="expertise-card"><div class="expertise-num">01</div><h3>{{FEATURE_1_TITLE}}</h3><p>{{FEATURE_1_DESC}}</p></article>
+          <article class="expertise-card"><div class="expertise-num">02</div><h3>{{FEATURE_2_TITLE}}</h3><p>{{FEATURE_2_DESC}}</p></article>
+          <article class="expertise-card"><div class="expertise-num">03</div><h3>{{FEATURE_3_TITLE}}</h3><p>{{FEATURE_3_DESC}}</p></article>
+          <article class="expertise-card"><div class="expertise-num">04</div><h3>{{FEATURE_4_TITLE}}</h3><p>{{FEATURE_4_DESC}}</p></article>
+          <article class="expertise-card"><div class="expertise-num">05</div><h3>{{FEATURE_5_TITLE}}</h3><p>{{FEATURE_5_DESC}}</p></article>
+          <article class="expertise-card"><div class="expertise-num">06</div><h3>{{FEATURE_6_TITLE}}</h3><p>{{FEATURE_6_DESC}}</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PROCESS ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{WORKFLOW_KICKER}}</div>
+        <h2>{{WORKFLOW_HEADLINE}}</h2>
+        <p class="section-copy">{{WORKFLOW_COPY}}</p>
+        <div class="process-list">
+          <div class="process-step"><div class="process-num-wrap"><div class="process-num">01</div></div><div><strong>{{WF_1_TITLE}}</strong><span>{{WF_1_DESC}}</span></div><div class="process-badge">{{WF_1_BADGE}}</div></div>
+          <div class="process-step"><div class="process-num-wrap"><div class="process-num">02</div></div><div><strong>{{WF_2_TITLE}}</strong><span>{{WF_2_DESC}}</span></div><div class="process-badge">{{WF_2_BADGE}}</div></div>
+          <div class="process-step"><div class="process-num-wrap"><div class="process-num">03</div></div><div><strong>{{WF_3_TITLE}}</strong><span>{{WF_3_DESC}}</span></div><div class="process-badge">{{WF_3_BADGE}}</div></div>
+          <div class="process-step"><div class="process-num-wrap"><div class="process-num">04</div></div><div><strong>{{WF_4_TITLE}}</strong><span>{{WF_4_DESC}}</span></div><div class="process-badge">{{WF_4_BADGE}}</div></div>
+          <div class="process-step"><div class="process-num-wrap"><div class="process-num">05</div></div><div><strong>{{WF_5_TITLE}}</strong><span>{{WF_5_DESC}}</span></div><div class="process-badge">{{WF_5_BADGE}}</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TESTIMONIALS ── -->
+    <section class="section">
+      <div class="inner">
+        <div class="section-kicker">{{TESTIMONIALS_KICKER}}</div>
+        <h2>{{TESTIMONIALS_HEADLINE}}</h2>
+        <p class="section-copy">{{TESTIMONIALS_COPY}}</p>
+        <div class="testimonial-grid">
+          <div class="testimonial-card">
+            <div class="quote-mark">"</div>
+            <p class="testimonial-text">{{TESTIMONIAL_1_TEXT}}</p>
+            <div class="testimonial-author">
+              <div class="author-name">{{TESTIMONIAL_1_NAME}}</div>
+              <div class="author-role">{{TESTIMONIAL_1_ROLE}}</div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="quote-mark">"</div>
+            <p class="testimonial-text">{{TESTIMONIAL_2_TEXT}}</p>
+            <div class="testimonial-author">
+              <div class="author-name">{{TESTIMONIAL_2_NAME}}</div>
+              <div class="author-role">{{TESTIMONIAL_2_ROLE}}</div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="quote-mark">"</div>
+            <p class="testimonial-text">{{TESTIMONIAL_3_TEXT}}</p>
+            <div class="testimonial-author">
+              <div class="author-name">{{TESTIMONIAL_3_NAME}}</div>
+              <div class="author-role">{{TESTIMONIAL_3_ROLE}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section class="cta-section">
+      <div class="cta-panel">
+        <div class="section-kicker" style="justify-content:center">{{CTA_KICKER}}</div>
+        <h2>{{CTA_HEADLINE}}</h2>
+        <p>{{CTA_COPY}}</p>
+        <div class="btn-row" style="justify-content:center">
+          <a class="btn btn-primary" href="{{CTA_PRIMARY_URL}}">{{CTA_PRIMARY_LABEL}}</a>
+          <a class="btn btn-secondary" href="{{CTA_SECONDARY_URL}}">{{CTA_SECONDARY_LABEL}}</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>© {{YEAR}} {{BUSINESS_NAME}} · {{FOOTER_TAGLINE}}</div>
+    <div class="footer-links">
+      <a href="{{FOOTER_LINK_1_URL}}">{{FOOTER_LINK_1_LABEL}}</a>
+      <a href="{{FOOTER_LINK_2_URL}}">{{FOOTER_LINK_2_LABEL}}</a>
+      <a href="{{FOOTER_LINK_3_URL}}">{{FOOTER_LINK_3_LABEL}}</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
