@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -47,6 +47,9 @@
   .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
   .btn-ghost{background:var(--panel-2);border:1px solid var(--line);color:var(--ink);font-weight:500;font-size:12.5px;padding:11px}
   .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-select{background:#fff;color:#061a09;font-weight:800;margin-top:16px;border:2px solid var(--accent);display:none;letter-spacing:.01em}
+  .btn-select:hover{transform:translateY(-2px);box-shadow:0 14px 38px -10px rgba(100,255,150,.35)}
+  .btn-select:disabled{opacity:.6;cursor:wait;transform:none}
   .hint{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);text-align:center;margin-top:11px;letter-spacing:.04em;line-height:1.5}
   .preview{position:relative;background:#05070b;min-height:0;display:flex;flex-direction:column}
   .pv-bar{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-shrink:0}
@@ -90,6 +93,7 @@
         <button class="btn btn-ghost" id="rewrite">✎ Rewrite copy</button>
       </div>
       <div class="hint" id="hint">Calls your Netlify function · falls back to demo AI / built-in writer</div>
+      <button class="btn btn-select" id="selectBtn">Select this site &rarr; Continue to purchase</button>
     </div>
   </div>
   <div class="preview">
@@ -127,8 +131,13 @@ const SAMPLE={
   site:"aiflowdeskpro.com", email:"jmitchell@ai4businesses.com", addr:"2780 South Jones Boulevard, Las Vegas, NV 89146"
 };
 const $=id=>document.getElementById(id);
-function fill(){$("q_name").value=SAMPLE.name;$("q_what").value=SAMPLE.what;$("q_who").value=SAMPLE.who;
-  $("q_diff").value=SAMPLE.diff;$("q_else").value=SAMPLE.else;$("c_site").value=SAMPLE.site;$("c_email").value=SAMPLE.email;$("c_addr").value=SAMPLE.addr;}
+function fill(){
+  // Pre-fill from URL params set by signup (m=userId, e=email, n=name)
+  const p=new URLSearchParams(location.search);
+  const em=p.get('e')?decodeURIComponent(p.get('e')):'';
+  if(em) $("c_email").value=em;
+  // Business questions are left blank — this is their site, their words
+}
 fill();
 function readAnswers(){return{name:$("q_name").value.trim()||"Your Business",what:$("q_what").value.trim(),
   who:$("q_who").value.trim(),diff:$("q_diff").value.trim(),else:$("q_else").value.trim(),
@@ -312,6 +321,7 @@ function render(){
   pv.innerHTML=`<span class="sw" style="background:${d.accent}"></span>${esc((cur.design&&cur.design.mood)||d.layout)} · ${esc(d.fd)}`;
   const site=(cur.content.contact&&cur.content.contact.site)||(cur.content.brand||"site").toLowerCase().replace(/[^a-z0-9]+/g,"")+".com";
   $("pvurl").textContent="https://"+site;
+  $("selectBtn").style.display="block";
 }
 function busy(b,msg){$("go").disabled=b;$("go").textContent=b?"Generating…":"Generate site →";
   if(b){$("empty").style.display="flex";$("empty").innerHTML='<div class="spinner"></div><div class="pulse">'+(msg||"Writing copy & designing…")+'</div>';}}
@@ -334,6 +344,57 @@ async function generate(newCopy,newDesign){
 $("go").addEventListener("click",()=>generate(true,true));
 $("rewrite").addEventListener("click",()=>generate(true,false));
 $("shuffle").addEventListener("click",()=>{ if(!cur){generate(true,true);return;} generate(false,true); });
+
+/* ── SELECT THIS SITE → PURCHASE ── */
+async function selectAndCheckout(){
+  if(!cur){alert("Generate a site first — hit Generate site → above.");return;}
+  const p=new URLSearchParams(location.search);
+  const userId=p.get('m')||'';
+  const email=p.get('e')?decodeURIComponent(p.get('e')):'';
+  const name=p.get('n')?decodeURIComponent(p.get('n')):'';
+  if(!email){alert("Session expired — please return to ai4websitedesign.com and sign in again.");return;}
+  const btn=$("selectBtn");
+  btn.disabled=true; btn.textContent="Saving your site…";
+  try{
+    const answers=readAnswers();
+    const html=buildSite(cur.content,cur.design);
+    // 1. Persist the chosen site before leaving this page
+    const saveRes=await fetch("https://ai4websitedesign.com/.netlify/functions/save-build",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email, user_id:userId, full_name:name,
+        business_name:answers.name||"Website Build",
+        built_html:html,
+        site_data:{content:cur.content,design:cur.design,answers},
+        template_selected:(cur.design&&cur.design.layout)||"ENGINE",
+        color_choice:(cur.design&&cur.design.palette&&cur.design.palette.accent)||"AUTO"
+      })
+    });
+    const saved=await saveRes.json();
+    if(!saved.success) throw new Error(saved.error||"Could not save your site.");
+    const siteId=saved.site_id;
+    // 2. Send OTP access code to user's email (non-fatal if it fails)
+    btn.textContent="Sending your access code…";
+    await fetch("https://ai4websitedesign.com/.netlify/functions/send-otp",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email})
+    }).catch(()=>{});
+    // 3. Redirect to product purchasing site with site reference
+    btn.textContent="✓ Check your email for your access code";
+    setTimeout(()=>{
+      const url=new URL("https://ai4-product-purchasing.ai4businesses.org/");
+      url.searchParams.set("site",siteId);
+      url.searchParams.set("e",encodeURIComponent(email));
+      location.href=url.toString();
+    },1800);
+  }catch(err){
+    console.error("Select error:",err);
+    btn.disabled=false; btn.textContent="Select this site → Continue to purchase";
+    alert(err.message||"Could not save your site. Please try again.");
+  }
+}
+$("selectBtn").addEventListener("click",selectAndCheckout);
 </script>
 </body>
 </html>
+
