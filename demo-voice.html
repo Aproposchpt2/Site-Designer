@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Voice Attendant Demo — FlowDesk Pro</title>
+<meta name="description" content="FlowDesk Pro AI Voice Attendant captures caller requests and creates structured call records for follow-up." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#050c1a;--bg2:#071224;--surface:rgba(10,20,42,.86);--line:rgba(45,156,219,.16);--line2:rgba(45,156,219,.32);
+  --accent:#2d9cdb;--accent2:#1a7bb8;--accent3:#5cc5f0;--white:#f0f6ff;--silver:#b8cce0;--muted:#7a94ad;--muted2:#4e6880;
+  --green:#34d399;--amber:#f59e0b;--red:#f87171;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--display:'DM Serif Display',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0} body{font-family:var(--sans);background:radial-gradient(circle at 20% 5%,rgba(45,156,219,.18),transparent 32%),linear-gradient(180deg,var(--bg),#030714 60%,var(--bg2));color:var(--muted);min-height:100vh}
+a{color:inherit;text-decoration:none}
+nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:0 clamp(1rem,4vw,2.5rem);height:68px;background:rgba(5,12,26,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}
+.nav-logo{display:flex;align-items:center;gap:.8rem}.nav-logo img{height:34px}.nav-logo-text{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent3)}
+.nav-links{display:flex;align-items:center;gap:.5rem}.nav-link{font-size:.82rem;font-weight:700;color:var(--muted);padding:.5rem .85rem;border-radius:999px}.nav-link:hover{color:var(--white);background:rgba(255,255,255,.06)}
+.nav-cta,.btn-primary,.btn-call{font-weight:800;color:#03101f;background:linear-gradient(130deg,var(--accent3),var(--accent),var(--accent2));border-radius:999px;box-shadow:0 0 28px rgba(45,156,219,.32)}
+.nav-cta{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;padding:.65rem 1.3rem}
+.hero{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:clamp(3rem,6vw,5rem) clamp(1rem,4vw,2.5rem);display:grid;grid-template-columns:1fr 430px;gap:3rem;align-items:center}
+.breadcrumb,.product-num,.kicker{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem}.breadcrumb{color:var(--muted2);margin-bottom:1.4rem}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,5vw,4rem);line-height:1.05;color:var(--white);margin-bottom:1.2rem} h1 em{color:var(--accent3)}
+.hero-desc{font-size:1rem;line-height:1.8;color:var(--silver);max-width:560px;margin-bottom:1.7rem}
+.badge-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.8rem}.badge{font-family:var(--mono);font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:4px 12px}
+.badge-green{color:var(--green);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25)}.badge-blue{color:var(--accent3);background:rgba(45,156,219,.08);border:1px solid rgba(45,156,219,.22)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.85rem}.btn-primary,.btn-secondary{display:inline-flex;align-items:center;gap:.6rem;padding:.9rem 2rem}.btn-secondary{font-weight:700;color:var(--white);border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.04)}
+.demo-panel,.dashboard-panel{background:linear-gradient(145deg,rgba(10,20,48,.95),rgba(7,18,36,.9));border:1px solid var(--line2);border-radius:22px;padding:2rem;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.demo-panel-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}.demo-number-display{font-family:var(--display);font-size:2rem;color:var(--white)}
+.demo-number-sub{font-family:var(--mono);font-size:.62rem;color:var(--muted2);margin-bottom:1.4rem}.demo-step{display:flex;gap:.9rem;margin-bottom:1rem}.demo-step-num{width:26px;height:26px;min-width:26px;display:grid;place-items:center;border-radius:50%;background:rgba(45,156,219,.15);border:1px solid var(--line2);font-family:var(--mono);font-size:.62rem;color:var(--accent3);font-weight:800}
+.demo-step-text{font-size:.85rem;color:var(--silver);line-height:1.55}.demo-step-text strong{display:block;color:var(--white);margin-bottom:2px}.demo-divider{border:0;border-top:1px solid var(--line);margin:1.25rem 0}
+.demo-cta-row{display:flex;flex-direction:column;gap:.75rem}.btn-call,.btn-full-demo{display:flex;justify-content:center;align-items:center;gap:.6rem;padding:.85rem 1.5rem}.btn-full-demo{font-weight:700;color:var(--white);border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.04)}
+.section{position:relative;z-index:1;padding:clamp(3rem,6vw,5rem) clamp(1rem,4vw,2.5rem);border-top:1px solid var(--line)}.section-inner{max-width:1160px;margin:0 auto}.section-title{font-family:var(--display);font-size:clamp(1.7rem,3.5vw,2.6rem);font-weight:400;color:var(--white);margin-bottom:.8rem}.section-sub{line-height:1.8;color:var(--silver);max-width:720px;margin-bottom:1.5rem}
+.dash-top{display:flex;justify-content:space-between;gap:1rem;align-items:flex-end;margin-bottom:1rem}.dash-actions{display:flex;gap:.6rem;flex-wrap:wrap}.small-btn{border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--white);border-radius:999px;padding:.65rem 1rem;font-weight:800;cursor:pointer}
+.records{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.record{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:16px;padding:1rem}.record h3{color:var(--white);font-size:1rem;margin-bottom:.4rem}.record p{font-size:.82rem;line-height:1.55;margin:.3rem 0;color:var(--silver)}.pill{display:inline-block;font-family:var(--mono);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line2);border-radius:999px;padding:3px 8px;color:var(--accent3);margin-bottom:.6rem}.status{margin-top:1rem;color:var(--muted2);font-family:var(--mono);font-size:.72rem;white-space:pre-wrap}
+footer{padding:2rem clamp(1rem,4vw,2.5rem);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}.footer-entity{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--muted2)}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.nav-links{display:none}.records{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/">
+    <img src="AI4-FLOWDESK-PRO-LOGO.png" alt="FlowDesk Pro" />
+    <span class="nav-logo-text">FlowDesk Pro</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/">Home</a>
+    <a class="nav-link" href="demo-intake.html">Intake Engine</a>
+    <a class="nav-link" href="demo-leads.html">Lead Manager</a>
+  </div>
+  <a class="nav-cta" href="demo-request.html">Start Demo →</a>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="breadcrumb"><a href="/">FlowDesk Pro</a> / AI Voice Attendant</div>
+    <div class="product-num">Flagship Demo — Smart Auto Attendant</div>
+    <h1>AI answers the call.<br><em>Your team gets the record.</em></h1>
+    <p class="hero-desc">
+      FlowDesk Pro AI Voice Attendant answers inbound calls, captures caller intent, organizes the request, and creates a structured call record for follow-up.
+    </p>
+    <div class="badge-row">
+      <span class="badge badge-green">Voice Demo</span>
+      <span class="badge badge-blue">Twilio Voice</span>
+      <span class="badge badge-blue">Attendant Dashboard</span>
+      <span class="badge badge-blue">Email Alerts</span>
+    </div>
+    <div class="hero-actions">
+      <a class="btn-primary" href="demo-request.html">Request Personalized Demo →</a>
+      <a class="btn-secondary" href="#attendant-dashboard">View Attendant Dashboard</a>
+    </div>
+  </div>
+
+  <div class="demo-panel">
+    <div class="demo-panel-label">Try the Voice Demo</div>
+    <div class="demo-number-display">(702) 710-2622</div>
+    <div class="demo-number-sub">FlowDesk Pro Demo Line · Las Vegas, NV</div>
+
+    <div class="demo-step">
+      <div class="demo-step-num">1</div>
+      <div class="demo-step-text">
+        <strong>Submit demo request first</strong>
+        Add your phone and business name so the attendant can personalize the greeting when you call from that number.
+      </div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">2</div>
+      <div class="demo-step-text">
+        <strong>Call the demo line</strong>
+        The AI Voice Attendant asks for caller details, request type, and urgency.
+      </div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">3</div>
+      <div class="demo-step-text">
+        <strong>Watch the Attendant Dashboard</strong>
+        The call record appears below as a standalone AI Voice Attendant record.
+      </div>
+    </div>
+
+    <hr class="demo-divider" />
+
+    <div class="demo-cta-row">
+      <a class="btn-call" href="demo-request.html">Get Personalized Demo Link →</a>
+      <a class="btn-full-demo" href="tel:7027102622">📞 Call Now: (702) 710-2622</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="attendant-dashboard">
+  <div class="section-inner">
+    <div class="kicker">Standalone AI Voice Attendant Dashboard</div>
+    <h2 class="section-title">Recent call records captured by the attendant.</h2>
+    <p class="section-sub">
+      This dashboard is intentionally separate from the Lead Manager while the voice demo is being stabilized.
+      It shows only records created by the AI Voice Attendant path.
+    </p>
+
+    <div class="dashboard-panel">
+      <div class="dash-top">
+        <div>
+          <div class="demo-panel-label">AI Voice Attendant Records</div>
+          <p style="line-height:1.7;color:var(--muted);">Records load from <code>source_page = ai_voice_attendant</code>.</p>
+        </div>
+        <div class="dash-actions">
+          <button class="small-btn" type="button" onclick="loadVoiceRecords()">Refresh Records</button>
+          <button class="small-btn" type="button" onclick="testHealth()">Check Health</button>
+        </div>
+      </div>
+      <div id="records" class="records"></div>
+      <div id="dashStatus" class="status">Loading records…</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-entity">FlowDesk Pro · Powered by Apropos Group LLC</div>
+  <div class="footer-entity">AI Voice Attendant Demo</div>
+</footer>
+
+<script>
+'use strict';
+
+const recordsEl = document.getElementById('records');
+const statusEl = document.getElementById('dashStatus');
+
+function esc(value){
+  return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function fmtDate(value){
+  try { return new Date(value).toLocaleString(); } catch { return value || 'Not provided'; }
+}
+
+async function safeJson(response){
+  const text = await response.text();
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
+  return { ok: response.ok, status: response.status, data };
+}
+
+async function loadVoiceRecords(){
+  statusEl.textContent = 'Loading AI Voice Attendant records…';
+  recordsEl.innerHTML = '';
+
+  try {
+    const response = await fetch('/.netlify/functions/flowdesk-voice-records?limit=9');
+    const result = await safeJson(response);
+
+    if (!response.ok || result.data.error || result.data.ok === false) {
+      throw new Error(result.data.error || result.data.details || 'Unable to load voice records.');
+    }
+
+    const records = result.data.records || [];
+    if (!records.length) {
+      statusEl.textContent = 'No AI Voice Attendant call records found yet. Place a test call after deploying the voice functions.';
+      return;
+    }
+
+    recordsEl.innerHTML = records.map(record => `
+      <article class="record">
+        <span class="pill">${esc(record.urgency || 'Normal')}</span>
+        <h3>${esc(record.business_name || 'Voice Call')}</h3>
+        <p><strong>Caller:</strong> ${esc(record.full_name || 'Not provided')}</p>
+        <p><strong>Phone:</strong> ${esc(record.phone || 'Not provided')}</p>
+        <p><strong>Request:</strong> ${esc(record.request_type || 'AI Voice Attendant Call')}</p>
+        <p><strong>Summary:</strong> ${esc(record.ai_summary || record.details || 'No summary captured.')}</p>
+        <p><strong>Next:</strong> ${esc(record.next_action || 'Review and follow up.')}</p>
+        <p><strong>Created:</strong> ${esc(fmtDate(record.created_at))}</p>
+      </article>
+    `).join('');
+
+    statusEl.textContent = `Loaded ${records.length} AI Voice Attendant record(s).`;
+  } catch (error) {
+    statusEl.textContent = 'Dashboard error: ' + error.message;
+  }
+}
+
+async function testHealth(){
+  statusEl.textContent = 'Checking voice function health…';
+
+  try {
+    const response = await fetch('/.netlify/functions/flowdesk-voice-health');
+    const result = await safeJson(response);
+    statusEl.textContent = JSON.stringify(result.data, null, 2);
+  } catch (error) {
+    statusEl.textContent = 'Health check error: ' + error.message;
+  }
+}
+
+loadVoiceRecords();
+setInterval(loadVoiceRecords, 20000);
+</script>
+</body>
+</html>

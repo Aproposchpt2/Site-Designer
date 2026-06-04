@@ -1,0 +1,67 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# ─── CLEAN URL REDIRECTS ───────────────────────────────────────
+# Lead Manager (fixes broken redirect)
+[[redirects]]
+from = "/leads"
+to = "/flowdesk-lead-manager-dashboard.html"
+status = 200
+
+[[redirects]]
+from = "/lead-manager"
+to = "/flowdesk-lead-manager-dashboard.html"
+status = 200
+
+[[redirects]]
+from = "/dashboard/leads"
+to = "/flowdesk-lead-manager-dashboard.html"
+status = 200
+
+# Intake Engine
+[[redirects]]
+from = "/intake"
+to = "/flowdesk-intake-engine.html"
+status = 200
+
+# Product Pages
+[[redirects]]
+from = "/voice"
+to = "/demo-voice.html"
+status = 200
+
+[[redirects]]
+from = "/ai-voice"
+to = "/demo-voice.html"
+status = 200
+
+# Demo Flow
+[[redirects]]
+from = "/start"
+to = "/demo-request.html"
+status = 200
+
+[[redirects]]
+from = "/demo"
+to = "/demo-request.html"
+status = 200
+
+# ─── SECURITY HEADERS ──────────────────────────────────────────
+[[headers]]
+for = "/*"
+  [headers.values]
+  X-Frame-Options = "SAMEORIGIN"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+for = "/.netlify/functions/*"
+  [headers.values]
+  Access-Control-Allow-Origin = "https://aiflowdeskpro.com"
+  Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+  Access-Control-Allow-Headers = "Content-Type, Authorization"

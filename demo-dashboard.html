@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowDesk Pro — Live Demo Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--bg-2:#161b22;--bg-3:#1c2128;--border:rgba(255,255,255,0.07);--border-m:rgba(255,255,255,0.12);--blue:#2d9cdb;--blue-dim:rgba(45,156,219,0.1);--green:#3fb950;--green-dim:rgba(63,185,80,0.1);--amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);--red:#ef4444;--red-dim:rgba(239,68,68,0.1);--text-1:#f0f6fc;--text-2:#c9d1d9;--text-3:#8b949e;--text-4:#484f58;--display:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--r:8px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text-2);font-family:var(--sans);font-size:13px;line-height:1.5;padding:20px;min-height:100vh;}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.dash-title{font-family:var(--display);font-size:.95rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em;}
+.dash-title span{color:var(--blue);}
+.dash-subtitle{font-family:var(--mono);font-size:.6rem;color:var(--text-4);margin-top:2px;}
+.live-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--green);letter-spacing:.06em;background:var(--green-dim);border:1px solid rgba(63,185,80,0.2);padding:.25rem .7rem;border-radius:100px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(63,185,80,.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(63,185,80,0)}}
+.private-badge{display:none;align-items:center;gap:6px;font-family:var(--mono);font-size:.62rem;color:var(--blue);background:rgba(45,156,219,0.08);border:1px solid rgba(45,156,219,0.2);padding:.25rem .7rem;border-radius:100px;margin-bottom:10px;}
+.private-badge.visible{display:flex;}
+.name-hint{display:none;align-items:flex-start;gap:10px;background:rgba(45,156,219,0.06);border:1px solid rgba(45,156,219,0.15);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;}
+.name-hint.visible{display:flex;}
+.name-hint-icon{font-size:1rem;flex-shrink:0;}
+.name-hint-text{font-family:var(--mono);font-size:.65rem;color:var(--text-3);line-height:1.6;}
+.name-hint-text strong{color:var(--blue);}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
+.stat-val{font-family:var(--display);font-size:1.6rem;font-weight:800;color:var(--text-1);letter-spacing:-.04em;line-height:1;margin-bottom:4px;}
+.stat-lbl{font-family:var(--mono);font-size:.58rem;color:var(--text-4);letter-spacing:.06em;text-transform:uppercase;}
+.waiting-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center;border:1px dashed var(--border-m);border-radius:var(--r);gap:12px;}
+.waiting-icon{font-size:2rem;opacity:.4;animation:bounce 2s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.waiting-title{font-family:var(--display);font-size:.95rem;font-weight:700;color:var(--text-3);letter-spacing:-.02em;}
+.waiting-sub{font-family:var(--mono);font-size:.65rem;color:var(--text-4);line-height:1.6;max-width:300px;}
+.waiting-number{font-family:var(--display);font-size:1.1rem;font-weight:800;color:var(--blue);letter-spacing:-.03em;background:var(--blue-dim);border:1px solid rgba(45,156,219,0.2);padding:.4rem 1rem;border-radius:6px;}
+.name-reminder{font-family:var(--mono);font-size:.65rem;color:var(--green);background:var(--green-dim);border:1px solid rgba(63,185,80,0.2);border-radius:6px;padding:.35rem .75rem;}
+.leads-list{display:flex;flex-direction:column;gap:8px;}
+.lead-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:8px;transition:border-color .2s;animation:slideIn .4s ease both;}
+.lead-card:hover{border-color:var(--border-m);}
+.lead-card.new-lead{border-color:rgba(63,185,80,0.35);box-shadow:0 0 0 1px rgba(63,185,80,0.1),0 0 20px rgba(63,185,80,0.05);}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.lead-left{min-width:0;}
+.lead-name{font-family:var(--display);font-size:.9rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lead-intent{font-size:.75rem;color:var(--text-3);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
+.lead-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.lead-phone{font-family:var(--mono);font-size:.62rem;color:var(--text-4);}
+.lead-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.lead-time{font-family:var(--mono);font-size:.6rem;color:var(--text-4);white-space:nowrap;}
+.badge{font-family:var(--mono);font-size:.58rem;font-weight:600;padding:.18rem .55rem;border-radius:100px;letter-spacing:.03em;white-space:nowrap;}
+.badge-high{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.badge-medium{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.2);}
+.badge-low{background:var(--green-dim);color:var(--green);border:1px solid rgba(63,185,80,0.2);}
+.badge-new{background:var(--green-dim);color:var(--green);border:1px solid rgba(63,185,80,0.3);}
+.dash-footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.dash-footer-txt{font-family:var(--mono);font-size:.6rem;color:var(--text-4);}
+.dash-footer-link{font-family:var(--mono);font-size:.6rem;color:var(--blue);text-decoration:none;}
+.dash-footer-link:hover{text-decoration:underline;}
+.loading{display:flex;align-items:center;justify-content:center;padding:2rem;gap:8px;font-family:var(--mono);font-size:.7rem;color:var(--text-4);}
+.loading-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:loadPulse 1.2s ease-in-out infinite;}
+.loading-dot:nth-child(2){animation-delay:.2s;}
+.loading-dot:nth-child(3){animation-delay:.4s;}
+@keyframes loadPulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.expired-bar{display:none;align-items:center;justify-content:center;gap:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:var(--r);padding:12px;margin-bottom:14px;font-family:var(--mono);font-size:.65rem;color:var(--red);}
+.expired-bar.visible{display:flex;}
+.expired-btn{background:var(--blue);color:#fff;border:none;border-radius:4px;padding:.3rem .8rem;font-family:var(--mono);font-size:.62rem;cursor:pointer;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="dash-header">
+  <div>
+    <div class="dash-title">Live <span>Demo</span> Feed</div>
+    <div class="dash-subtitle" id="dashSubtitle"></div>
+  </div>
+  <div class="live-pill"><span class="live-dot"></span>LIVE</div>
+</div>
+
+<div class="private-badge" id="privateBadge">🔒 Fresh private session — only calls made after this page opens appear here</div>
+
+<div class="name-hint" id="nameHint">
+  <span class="name-hint-icon">💡</span>
+  <div class="name-hint-text" id="nameHintText">
+    When the AI answers — <strong>say your first and last name and the reason for your call.</strong>
+    This links your call to your private dashboard.
+  </div>
+</div>
+
+<div class="expired-bar" id="expiredBar">
+  ⏱ Session expired (30 min limit) &nbsp;
+  <a href="/demo-request.html" class="expired-btn">Request New Demo</a>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="stat-val" id="totalCount">—</div><div class="stat-lbl">Total Calls</div></div>
+  <div class="stat-card"><div class="stat-val" id="urgentCount">—</div><div class="stat-lbl">High Urgency</div></div>
+  <div class="stat-card"><div class="stat-val" id="todayCount">—</div><div class="stat-lbl">Today</div></div>
+</div>
+
+<div id="leadContainer">
+  <div class="loading">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
+
+<div class="dash-footer">
+  <span class="dash-footer-txt">Updates in real time · Powered by FlowDesk Pro</span>
+  <a href="https://aiflowdeskpro.com/#cta" class="dash-footer-link">Get your own →</a>
+</div>
+
+<script>
+const CONFIG_URL = '/.netlify/functions/config';
+
+// ── READ PARAMS ──────────────────────────────────────────────────────
+const params        = new URLSearchParams(window.location.search);
+const demoRef       = params.get('ref')  || '';
+const prospectName  = decodeURIComponent(params.get('name') || '');
+const sessionTs     = parseInt(params.get('ts') || Date.now(), 10);
+const sessionStart  = new Date(sessionTs).toISOString();
+const SESSION_MS    = 30 * 60 * 1000; // 30 minutes
+
+let supabaseUrl = null;
+let supabaseKey = null;
+let leadsData   = [];
+
+// ── FORMAT REF ───────────────────────────────────────────────────────
+function formatRef(r) {
+  return r.split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+}
+const displayName = demoRef ? formatRef(demoRef) : '';
+
+// ── PERSONALIZE UI ────────────────────────────────────────────────────
+if (demoRef) {
+  document.getElementById('dashSubtitle').textContent = 'Private session for ' + displayName;
+  document.getElementById('privateBadge').classList.add('visible');
+  document.getElementById('nameHint').classList.add('visible');
+  if (prospectName) {
+    document.getElementById('nameHintText').innerHTML =
+      'When the AI answers — say your <strong>first and last name</strong> and the <strong>reason for your call</strong>. ' +
+      'Your new call record appears here after the attendant captures it.';
+  }
+}
+
+// ── SESSION EXPIRY ────────────────────────────────────────────────────
+function isExpired() {
+  return Date.now() - sessionTs > SESSION_MS;
+}
+function checkExpiry() {
+  if (isExpired()) {
+    document.getElementById('expiredBar').classList.add('visible');
+    return true;
+  }
+  return false;
+}
+setInterval(checkExpiry, 30000);
+
+// ── NAME MATCHING ─────────────────────────────────────────────────────
+function normName(n) {
+  return (n||'').toLowerCase().trim().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ');
+}
+
+function isMyLead(lead) {
+  // CHECKPOINT 1 — Timestamp: after session opened
+  const leadMs = new Date(lead.created_at).getTime();
+  if (leadMs < sessionTs - 5000) return false; // 5s buffer for clock skew
+
+  // CHECKPOINT 2 — Preferred match: demo_ref should match the private demo ref.
+  // This is more reliable than matching caller_name to business name.
+  if (demoRef && lead.demo_ref) {
+    return String(lead.demo_ref).toLowerCase() === String(demoRef).toLowerCase();
+  }
+
+  // CHECKPOINT 3 — Fallback name match only if no demo_ref is present.
+  if (prospectName && prospectName.length > 1) {
+    const callerNorm   = normName(lead.caller_name || lead.full_name || '');
+    const prospectNorm = normName(prospectName);
+
+    if (!callerNorm || callerNorm === 'caller') return true;
+
+    const callerWords   = callerNorm.split(' ').filter(w=>w.length>=3);
+    const prospectWords = prospectNorm.split(' ').filter(w=>w.length>=3);
+    const matched = callerWords.some(cw => prospectWords.includes(cw));
+
+    if (!matched) {
+      console.log('Name filter: skipping', callerNorm, '!= expected', prospectNorm);
+      return false;
+    }
+  }
+  return true;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function fmtPhone(p) {
+  if (!p) return '—';
+  const d = p.replace(/\D/g,'');
+  if (d.length===11) return '('+d.slice(1,4)+') '+d.slice(4,7)+'-'+d.slice(7);
+  if (d.length===10) return '('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6);
+  return p;
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-new Date(ts))/1000);
+  if (s<60) return s+'s ago';
+  if (s<3600) return Math.floor(s/60)+'m ago';
+  return Math.floor(s/3600)+'h ago';
+}
+function isToday(ts) {
+  const d=new Date(ts),n=new Date();
+  return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
+}
+function badge(u) {
+  if (!u) return '';
+  const c=u==='high'?'badge-high':u==='medium'?'badge-medium':'badge-low';
+  return '<span class="badge '+c+'">'+u.toUpperCase()+'</span>';
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────
+function render(newAtTop) {
+  checkExpiry();
+  const el = document.getElementById('leadContainer');
+
+  if (!leadsData.length) {
+    const firstName = prospectName ? prospectName.split(' ')[0] : '';
+    el.innerHTML =
+      '<div class="waiting-state">' +
+      '<div class="waiting-icon">📞</div>' +
+      '<div class="waiting-title">Waiting for your call...</div>' +
+      '<div class="waiting-sub">' +
+        (displayName ? 'Ready for '+displayName+'. Call the number — your call record appears here after capture.' : 'Call the demo number and watch your call record appear here after capture.') +
+      '</div>' +
+      (firstName ? '<div class="name-reminder">💡 Say your first and last name + reason for calling</div>' : '') +
+      '<div class="waiting-number">(702) 710-2622</div>' +
+      '</div>';
+    document.getElementById('totalCount').textContent='0';
+    document.getElementById('urgentCount').textContent='0';
+    document.getElementById('todayCount').textContent='0';
+    return;
+  }
+
+  document.getElementById('totalCount').textContent=leadsData.length;
+  document.getElementById('urgentCount').textContent=leadsData.filter(l=>l.urgency==='high').length;
+  document.getElementById('todayCount').textContent=leadsData.filter(l=>isToday(l.created_at)).length;
+
+  el.innerHTML='<div class="leads-list">'+leadsData.map((l,i)=>{
+    const isNew=newAtTop&&i===0;
+    const name=l.caller_name||l.full_name||'Unknown Caller';
+    const intent=l.summary||l.intent||'No details captured';
+    return '<div class="lead-card'+(isNew?' new-lead':'')+'">'+
+      '<div class="lead-left">'+
+        '<div class="lead-name">'+name+(isNew?' <span class="badge badge-new" style="font-size:.5rem">NEW</span>':'')+' </div>'+
+        '<div class="lead-intent">'+intent+'</div>'+
+        '<div class="lead-meta"><span class="lead-phone">'+fmtPhone(l.caller_phone)+'</span>'+badge(l.urgency)+'</div>'+
+      '</div>'+
+      '<div class="lead-right"><div class="lead-time">'+timeAgo(l.created_at)+'</div></div>'+
+      '</div>';
+  }).join('')+'</div>';
+}
+
+// ── FETCH ─────────────────────────────────────────────────────────────
+async function fetchLeads() {
+  try {
+    const url =
+      '/.netlify/functions/flowdesk-private-demo-leads' +
+      '?ref=' + encodeURIComponent(demoRef || '') +
+      '&since=' + encodeURIComponent(sessionStart) +
+      '&limit=20';
+
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const text = await res.text();
+    let payload = {};
+    try { payload = text ? JSON.parse(text) : {}; } catch { payload = { raw: text }; }
+
+    if (!res.ok || payload.ok === false) {
+      throw new Error(payload.error || payload.details || 'HTTP ' + res.status);
+    }
+
+    leadsData = Array.isArray(payload.records) ? payload.records : [];
+    render(false);
+  } catch(e) {
+    console.error('Fetch:', e);
+    document.getElementById('leadContainer').setAttribute('data-error', e.message);
+    render(false);
+  }
+}
+
+// ── REALTIME ──────────────────────────────────────────────────────────
+function setupRealtime() {
+  // Realtime is intentionally disabled for the private demo dashboard during debugging.
+  // The dashboard now polls a secure Netlify function that reads records server-side by demo_ref.
+  return;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    await fetchLeads();
+    setInterval(fetchLeads, 5000);
+  } catch(e) {
+    console.error('Init:', e);
+    document.getElementById('leadContainer').innerHTML =
+      '<div class="waiting-state"><div class="waiting-icon">📞</div>' +
+      '<div class="waiting-title">Fresh dashboard ready</div>' +
+      '<div class="waiting-number">(702) 710-2622</div></div>';
+  }
+}
+function startFreshSession() {
+  sessionStorage.setItem('flowdesk_demo_session_start_' + (demoRef || 'default'), new Date().toISOString());
+  window.location.reload();
+}
+
+init();
+</script>
+</body>
+</html>

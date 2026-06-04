@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowDesk — Welcome, You're In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0d1117;
+  --bg-2:      #161b22;
+  --bg-3:      #1c2128;
+  --bg-4:      #21262d;
+  --border:    rgba(255,255,255,0.08);
+  --border-m:  rgba(255,255,255,0.14);
+  --accent:    #2d9cdb;
+  --accent-2:  #1a7bb8;
+  --accent-dim: rgba(45,156,219,0.08);
+  --green:     #3fb950;
+  --green-dim: rgba(63,185,80,0.12);
+  --text-1:    #f0f6fc;
+  --text-2:    #c9d1d9;
+  --text-3:    #8b949e;
+  --text-4:    #484f58;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --serif: 'DM Serif Display', serif;
+  --display: 'Syne', sans-serif;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text-2);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(45,156,219,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,156,219,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Spotlight */
+body::after {
+  content: '';
+  position: fixed;
+  top: -100px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 700px;
+  background: radial-gradient(ellipse, rgba(63,185,80,.1) 0%, rgba(63,185,80,.03) 40%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 2.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(13,17,23,.92);
+  backdrop-filter: blur(16px);
+}
+.logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; }
+.logo-icon {
+  width: 32px; height: 32px; border-radius: var(--r-sm);
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: .75rem; font-weight: 500; color: #fff;
+}
+.logo-name { font-family: var(--display); font-size: 1rem; font-weight: 700; color: var(--text-1); letter-spacing: -.03em; }
+.nav-status {
+  display: flex; align-items: center; gap: .5rem;
+  font-family: var(--mono); font-size: .7rem; color: var(--green);
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(63,185,80,.4)} 50%{opacity:.8;box-shadow:0 0 0 6px rgba(63,185,80,0)} }
+
+/* ── MAIN ── */
+main {
+  flex: 1; position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 4rem 2rem;
+}
+
+/* Success badge */
+.success-badge {
+  display: inline-flex; align-items: center; gap: .6rem;
+  background: var(--green-dim); border: 1px solid rgba(63,185,80,.35);
+  border-radius: 100px; padding: .45rem 1.2rem;
+  font-family: var(--mono); font-size: .72rem; font-weight: 500;
+  color: var(--green); margin-bottom: 2rem;
+  box-shadow: 0 0 24px rgba(63,185,80,.12);
+  opacity: 0; animation: fadeUp .6s .2s ease forwards;
+}
+
+/* Headline */
+.welcome-h1 {
+  font-family: var(--display);
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 1.04; letter-spacing: -.05em;
+  color: var(--text-1); text-align: center;
+  margin-bottom: 1.25rem;
+  opacity: 0; animation: fadeUp .7s .35s ease forwards;
+}
+.welcome-h1 em {
+  font-family: var(--serif);
+  font-style: italic; color: var(--green);
+  letter-spacing: -.02em;
+}
+
+.welcome-sub {
+  font-size: 1.05rem; color: var(--text-3); text-align: center;
+  max-width: 520px; line-height: 1.7; margin-bottom: 3rem;
+  opacity: 0; animation: fadeUp .7s .5s ease forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Onboarding card */
+.onboard-card {
+  background: var(--bg-2); border: 1px solid var(--border-m);
+  border-radius: var(--r-lg); padding: 2.5rem;
+  max-width: 640px; width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+  opacity: 0; animation: fadeUp .7s .65s ease forwards;
+}
+
+.onboard-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.75rem; padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.onboard-title {
+  font-size: .8rem; font-weight: 600; color: var(--text-2);
+  letter-spacing: .02em; text-transform: uppercase;
+  font-family: var(--mono);
+}
+.onboard-steps-count {
+  font-family: var(--mono); font-size: .7rem; color: var(--text-4);
+}
+
+/* Step list */
+.steps-list { display: flex; flex-direction: column; gap: 0; }
+
+.step-row {
+  display: flex; gap: 1.25rem; align-items: flex-start;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0; animation: fadeUp .5s ease forwards;
+}
+.step-row:last-child { border-bottom: none; }
+.step-row:nth-child(1) { animation-delay: .75s; }
+.step-row:nth-child(2) { animation-delay: .85s; }
+.step-row:nth-child(3) { animation-delay: .95s; }
+.step-row:nth-child(4) { animation-delay: 1.05s; }
+
+.step-icon {
+  width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+}
+.step-icon.done  { background: var(--green-dim); border: 1px solid rgba(63,185,80,.2); }
+.step-icon.todo  { background: var(--accent-dim); border: 1px solid rgba(45,156,219,.2); }
+.step-icon.wait  { background: var(--bg-3); border: 1px solid var(--border); }
+
+.step-body { flex: 1; }
+.step-title {
+  font-size: .88rem; font-weight: 600; color: var(--text-1);
+  margin-bottom: .25rem; letter-spacing: -.01em;
+}
+.step-desc { font-size: .78rem; color: var(--text-3); line-height: 1.55; }
+
+.step-badge {
+  font-family: var(--mono); font-size: .62rem; font-weight: 500;
+  padding: .2rem .6rem; border-radius: 100px; white-space: nowrap;
+  align-self: flex-start; margin-top: .15rem;
+}
+.sb-done { background: var(--green-dim); color: var(--green); border: 1px solid rgba(63,185,80,.2); }
+.sb-next { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(45,156,219,.2); }
+.sb-soon { background: var(--bg-3); color: var(--text-4); border: 1px solid var(--border); }
+
+/* Terminal block */
+.terminal {
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--r-md); margin-top: 1.75rem;
+  overflow: hidden;
+  opacity: 0; animation: fadeUp .6s 1.2s ease forwards;
+}
+.term-bar {
+  background: var(--bg-4); padding: .65rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: .5rem;
+}
+.td { width: 10px; height: 10px; border-radius: 50%; }
+.td.r{background:#ff5f57}.td.y{background:#febc2e}.td.g{background:#28c840}
+.term-label { font-family: var(--mono); font-size: .68rem; color: var(--text-4); margin: 0 auto; }
+.term-body {
+  padding: 1.1rem 1.25rem;
+  font-family: var(--mono); font-size: .75rem; line-height: 1.9;
+}
+.tg { color: var(--green); }
+.tb { color: var(--accent); }
+.td2{ color: var(--text-4); }
+.tw { color: var(--text-1); }
+.cursor {
+  display: inline-block; width: 7px; height: 13px;
+  background: var(--accent); vertical-align: middle; margin-left: 2px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Contact / support row */
+.support-row {
+  display: flex; gap: 1rem; margin-top: 1.75rem; flex-wrap: wrap;
+  opacity: 0; animation: fadeUp .6s 1.3s ease forwards;
+}
+.support-btn {
+  flex: 1; min-width: 160px; text-align: center;
+  text-decoration: none; font-size: .8rem; font-weight: 600;
+  padding: .7rem 1rem; border-radius: var(--r-sm);
+  transition: all .2s;
+}
+.sb-primary {
+  font-family: var(--display);
+  background: var(--accent); color: #fff; border: 1px solid rgba(45,156,219,.4);
+  box-shadow: 0 0 20px rgba(45,156,219,.2);
+}
+.sb-primary:hover { background: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-dim), 0 0 28px rgba(45,156,219,.25); }
+.sb-outline {
+  color: var(--text-2); border: 1px solid var(--border-m); background: transparent;
+}
+.sb-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-txt { font-family: var(--mono); font-size: .65rem; color: var(--text-4); }
+.footer-links { display: flex; gap: 1.5rem; list-style: none; }
+.footer-links a {
+  font-size: .72rem; color: var(--text-4); text-decoration: none; transition: color .2s;
+}
+.footer-links a:hover { color: var(--text-2); }
+
+@media (max-width: 640px) {
+  nav { padding: 1rem 1.25rem; }
+  main { padding: 2.5rem 1.25rem; }
+  .onboard-card { padding: 1.5rem; }
+  footer { flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://flowdeskpro.aproposgroupllc.com" class="logo">
+    <div class="logo-icon">fd</div>
+    <span class="logo-name">FlowDesk</span>
+  </a>
+  <div class="nav-status">
+    <span class="status-dot"></span>
+    Account Active
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <div class="success-badge">
+    <span>✓</span> Payment confirmed by Stripe
+  </div>
+
+  <h1 class="welcome-h1">
+    You're in.<br>
+    FlowDesk is <em>yours.</em>
+  </h1>
+
+  <p class="welcome-sub">
+    Your account is being activated now. You'll receive a setup email within the next few minutes. Here's exactly what happens next.
+  </p>
+
+  <!-- Onboarding card -->
+  <div class="onboard-card">
+    <div class="onboard-header">
+      <span class="onboard-title">Your Onboarding Checklist</span>
+      <span class="onboard-steps-count">4 steps · ~10 min total</span>
+    </div>
+
+    <div class="steps-list">
+      <div class="step-row">
+        <div class="step-icon done">✓</div>
+        <div class="step-body">
+          <div class="step-title">Payment confirmed</div>
+          <div class="step-desc">Your subscription is active. A receipt has been sent to your email by Stripe.</div>
+        </div>
+        <span class="step-badge sb-done">Done</span>
+      </div>
+
+      <div class="step-row">
+        <div class="step-icon todo">📧</div>
+        <div class="step-body">
+          <div class="step-title">Check your inbox</div>
+          <div class="step-desc">Your setup email from FlowDesk is on its way. It contains your login credentials and your dedicated intake phone number.</div>
+        </div>
+        <span class="step-badge sb-next">Next</span>
+      </div>
+
+      <div class="step-row">
+        <div class="step-icon todo">📞</div>
+        <div class="step-body">
+          <div class="step-title">Set up your intake number</div>
+          <div class="step-desc">Forward your business calls to your dedicated FlowDesk number — or use it as your primary contact number. Takes under 5 minutes.</div>
+        </div>
+        <span class="step-badge sb-soon">Step 3</span>
+      </div>
+
+      <div class="step-row">
+        <div class="step-icon wait">🚀</div>
+        <div class="step-body">
+          <div class="step-title">Go live — start capturing leads</div>
+          <div class="step-desc">Your AI attendant answers, qualifies, and delivers structured lead records to your dashboard from the first call. 24/7, automatic.</div>
+        </div>
+        <span class="step-badge sb-soon">Step 4</span>
+      </div>
+    </div>
+
+    <!-- Terminal confirmation -->
+    <div class="terminal">
+      <div class="term-bar">
+        <div class="td r"></div><div class="td y"></div><div class="td g"></div>
+        <span class="term-label">flowdesk · account provisioning</span>
+      </div>
+      <div class="term-body">
+        <div class="tg">✓ stripe payment verified</div>
+        <div class="td2">  → subscription status: active</div>
+        <div class="td2">  → plan: initializing…</div>
+        <br>
+        <div class="tg">✓ account record created</div>
+        <div class="td2">  → intake number: provisioning</div>
+        <div class="td2">  → dashboard: configuring</div>
+        <br>
+        <div class="tb">→ setup email: dispatching now</div>
+        <div class="td2">  → eta: &lt; 5 minutes</div>
+        <br>
+        <div class="tw">_ <span class="cursor"></span></div>
+      </div>
+    </div>
+
+    <!-- Support buttons -->
+    <div class="support-row">
+      <a href="mailto:support@aproposgroupllc.com?subject=FlowDesk%20Setup%20Help"
+         class="support-btn sb-primary">
+        Contact Setup Support
+      </a>
+      <a href="https://flowdeskpro.aproposgroupllc.com" class="support-btn sb-outline">
+        ← Back to FlowDesk
+      </a>
+    </div>
+
+  </div><!-- /onboard-card -->
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-txt">© 2026 Apropos Group LLC · FlowDesk</span>
+  <ul class="footer-links">
+    <li><a href="mailto:support@aproposgroupllc.com">support@aproposgroupllc.com</a></li>
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+  </ul>
+</footer>
+
+<script>
+// Read plan from Stripe success URL query param if present
+// Stripe lets you append {CHECKOUT_SESSION_ID} — we just read 'plan' if passed
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const plan = params.get('plan');
+  if (plan) {
+    // Update the terminal to reflect the actual plan
+    const lines = document.querySelectorAll('.term-body .td2');
+    lines.forEach(l => {
+      if (l.textContent.includes('plan: initializing')) {
+        l.textContent = `  → plan: ${plan} · active`;
+        l.style.color = 'var(--green)';
+      }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

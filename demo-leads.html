@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lead Manager CRM — FlowDesk Pro</title>
+  <meta name="description" content="FlowDesk Lead Manager CRM — Review every captured lead, sort by urgency, mark resolved, and track follow-up. Real-time Supabase dashboard. Try the live demo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050c1a; --bg2: #071224;
+      --surface: rgba(10,20,42,0.82); --surface2: rgba(14,28,56,0.9);
+      --line: rgba(45,156,219,0.13); --line2: rgba(45,156,219,0.28);
+      --accent: #2d9cdb; --accent2: #1a7bb8; --accent3: #5cc5f0;
+      --purple: #7c3aed; --purple2: #9d6ef8;
+      --white: #f0f6ff; --silver: #b8cce0; --muted: #7a94ad; --muted2: #4e6880;
+      --green: #34d399; --amber: #f59e0b; --red: #f87171;
+      --mono: 'JetBrains Mono', monospace; --sans: 'DM Sans', sans-serif; --display: 'DM Serif Display', serif;
+      --radius: 14px; --radius-lg: 22px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--muted); overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(45,156,219,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(45,156,219,0.03) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.08) 75%, transparent);
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 0 clamp(1rem,4vw,2.5rem); height: 68px;
+      background: rgba(5,12,26,0.88); border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(20px);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.8rem; }
+    .nav-logo img { height: 34px; filter: drop-shadow(0 0 8px rgba(45,156,219,0.45)); }
+    .nav-logo-text { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent3); }
+    .nav-links { display: flex; align-items: center; gap: 0.3rem; }
+    .nav-link { font-size: 0.82rem; font-weight: 600; color: var(--muted); padding: 0.5rem 0.85rem; border-radius: 999px; transition: background 0.15s, color 0.15s; }
+    .nav-link:hover { color: var(--white); background: rgba(255,255,255,0.06); }
+    .nav-cta { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; color: #03101f; background: linear-gradient(130deg, var(--accent3), var(--accent), var(--accent2)); border-radius: 999px; padding: 0.65rem 1.3rem; white-space: nowrap; box-shadow: 0 0 24px rgba(45,156,219,0.32); transition: transform 0.15s, box-shadow 0.15s; }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 38px rgba(45,156,219,0.48); }
+
+    .product-hero {
+      position: relative; z-index: 1;
+      padding: clamp(3rem,6vw,5rem) clamp(1rem,4vw,2.5rem);
+      border-bottom: 1px solid var(--line);
+      display: grid; grid-template-columns: 1fr 420px; gap: 3.5rem; align-items: center;
+      max-width: 1160px; margin: 0 auto;
+    }
+    .breadcrumb { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1.5rem; }
+    .breadcrumb a { color: var(--accent3); }
+    .product-num { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+    h1 { font-family: var(--display); font-size: clamp(2rem,4.5vw,3.4rem); font-weight: 400; line-height: 1.1; color: var(--white); margin-bottom: 1.25rem; }
+    h1 em { font-style: italic; color: var(--purple2); }
+    .hero-desc { font-size: 1rem; color: var(--silver); line-height: 1.75; margin-bottom: 2rem; max-width: 520px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+    .badge { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 999px; padding: 4px 12px; }
+    .badge-green { color: var(--green); background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); }
+    .badge-blue { color: var(--accent3); background: rgba(45,156,219,0.08); border: 1px solid rgba(45,156,219,0.22); }
+    .badge-purple { color: var(--purple2); background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 0.92rem; color: #03101f; background: linear-gradient(130deg, var(--accent3) 0%, var(--accent) 55%, var(--accent2)); border-radius: 999px; padding: 0.9rem 2rem; box-shadow: 0 0 36px rgba(45,156,219,0.32); transition: transform 0.16s, box-shadow 0.16s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 52px rgba(45,156,219,0.48); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 600; font-size: 0.92rem; color: var(--white); border: 1px solid var(--line2); border-radius: 999px; padding: 0.9rem 2rem; background: rgba(255,255,255,0.04); transition: background 0.15s, border-color 0.15s; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+
+    /* DASHBOARD PREVIEW */
+    .dashboard-preview {
+      background: linear-gradient(145deg, rgba(7,18,36,0.97), rgba(10,20,48,0.95));
+      border: 1px solid var(--line2); border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    }
+    .db-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10,20,42,0.8);
+    }
+    .db-title { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent3); }
+    .db-live { display: flex; align-items: center; gap: 0.4rem; font-family: var(--mono); font-size: 0.58rem; color: var(--green); }
+    .db-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .db-stats { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--line); }
+    .db-stat { padding: 0.85rem 1rem; border-right: 1px solid var(--line); }
+    .db-stat:last-child { border-right: none; }
+    .db-stat-num { font-family: var(--display); font-size: 1.3rem; color: var(--white); line-height: 1; margin-bottom: 3px; }
+    .db-stat-label { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); }
+    .db-leads { display: flex; flex-direction: column; gap: 1px; background: var(--line); }
+    .db-lead { background: rgba(5,12,26,0.9); padding: 0.85rem 1.2rem; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; }
+    .db-lead-name { font-size: 0.82rem; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+    .db-lead-business { font-size: 0.72rem; color: var(--muted2); }
+    .db-lead-type { font-family: var(--mono); font-size: 0.55rem; color: var(--muted2); margin-top: 3px; }
+    .urgency { font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; border-radius: 999px; padding: 3px 8px; white-space: nowrap; }
+    .urgency-urgent { color: var(--red); background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); }
+    .urgency-high { color: var(--amber); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
+    .urgency-normal { color: var(--accent3); background: rgba(45,156,219,0.08); border: 1px solid rgba(45,156,219,0.22); }
+    .db-footer { padding: 0.85rem 1.2rem; display: flex; justify-content: center; border-top: 1px solid var(--line); }
+    .db-launch-btn {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      font-weight: 700; font-size: 0.82rem; color: #03101f;
+      background: linear-gradient(130deg, var(--accent3), var(--accent));
+      border-radius: 999px; padding: 0.72rem 1.5rem;
+      box-shadow: 0 0 22px rgba(45,156,219,0.28);
+      transition: transform 0.15s;
+    }
+    .db-launch-btn:hover { transform: translateY(-1px); }
+
+    /* SECTIONS */
+    .section { position: relative; z-index: 1; padding: clamp(3rem,6vw,5rem) clamp(1rem,4vw,2.5rem); border-bottom: 1px solid var(--line); }
+    .section-inner { max-width: 1160px; margin: 0 auto; }
+    .section-eyebrow { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.9rem; }
+    .section-title { font-family: var(--display); font-size: clamp(1.5rem,3vw,2.2rem); color: var(--white); line-height: 1.15; margin-bottom: 1rem; }
+    .section-sub { font-size: 0.95rem; color: var(--muted); line-height: 1.8; }
+
+    /* FEATURES */
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .feature-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.75rem; }
+    .feature-icon { font-size: 1.5rem; margin-bottom: 1rem; }
+    .feature-card h4 { font-family: var(--display); font-size: 1rem; color: var(--white); margin-bottom: 0.6rem; }
+    .feature-card p { font-size: 0.84rem; color: var(--muted2); line-height: 1.65; }
+
+    /* ROI */
+    .roi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .roi-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.75rem; }
+    .roi-number { font-family: var(--display); font-size: 2.2rem; color: var(--purple2); line-height: 1; margin-bottom: 0.5rem; }
+    .roi-card h4 { font-family: var(--display); font-size: 1rem; color: var(--white); margin-bottom: 0.65rem; }
+    .roi-card p { font-size: 0.85rem; color: var(--muted2); line-height: 1.65; }
+
+    footer { position: relative; z-index: 1; padding: 2rem clamp(1rem,4vw,2.5rem); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; border-top: 1px solid var(--line); }
+    .footer-logo { display: flex; align-items: center; gap: 0.75rem; }
+    .footer-logo img { height: 26px; filter: drop-shadow(0 0 6px rgba(45,156,219,0.3)); }
+    .footer-entity { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; color: var(--muted2); }
+
+    @media (max-width: 900px) { .product-hero { grid-template-columns: 1fr; } .nav-links { display: none; } .features-grid, .roi-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .features-grid, .roi-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="/">
+      <img src="AI4-FLOWDESK-PRO-LOGO.png" alt="FlowDesk Pro" />
+      <span class="nav-logo-text">FlowDesk Pro</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="demo-voice.html">AI Voice</a>
+      <a class="nav-link" href="demo-intake.html">Intake Engine</a>
+      <a class="nav-link" href="/#pricing">Pricing</a>
+    </div>
+    <a class="nav-cta" href="demo-request.html">Start Free Trial →</a>
+  </nav>
+
+  <div style="position:relative;z-index:1;border-bottom:1px solid var(--line);">
+    <div class="product-hero">
+      <div>
+        <div class="breadcrumb"><a href="/">FlowDesk Pro</a> / Product 02</div>
+        <div class="product-num">Product 02 — Lead Manager CRM</div>
+        <h1>Every lead, organized.<br><em>Nothing falls through.</em></h1>
+        <p class="hero-desc">
+          FlowDesk Lead Manager gives you a real-time view of every captured lead — from voice calls, web forms, and missed calls. Sort by urgency. Filter by status. Mark resolved. Export and act fast.
+        </p>
+        <div class="badge-row">
+          <span class="badge badge-green">● Live Demo</span>
+          <span class="badge badge-purple">Supabase Realtime</span>
+          <span class="badge badge-blue">Urgency Scoring</span>
+          <span class="badge badge-blue">Multi-source Intake</span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn-primary" href="flowdesk-lead-manager-dashboard.html">Launch Live Dashboard →</a>
+          <a class="btn-secondary" href="/#pricing">See Pricing</a>
+        </div>
+      </div>
+
+      <!-- DASHBOARD PREVIEW -->
+      <div class="dashboard-preview">
+        <div class="db-header">
+          <div class="db-title">Lead Manager Dashboard</div>
+          <div class="db-live"><div class="db-live-dot"></div> Live</div>
+        </div>
+        <div class="db-stats">
+          <div class="db-stat">
+            <div class="db-stat-num">24</div>
+            <div class="db-stat-label">New Today</div>
+          </div>
+          <div class="db-stat">
+            <div class="db-stat-num">3</div>
+            <div class="db-stat-label">Urgent</div>
+          </div>
+          <div class="db-stat">
+            <div class="db-stat-num">18</div>
+            <div class="db-stat-label">Resolved</div>
+          </div>
+        </div>
+        <div class="db-leads">
+          <div class="db-lead">
+            <div>
+              <div class="db-lead-name">Sandra Torres</div>
+              <div class="db-lead-business">Torres Family HVAC</div>
+              <div class="db-lead-type">AI Voice · Heating system down</div>
+            </div>
+            <div class="urgency urgency-urgent">URGENT</div>
+          </div>
+          <div class="db-lead">
+            <div>
+              <div class="db-lead-name">Michael Reeves</div>
+              <div class="db-lead-business">Reeves &amp; Partners Law</div>
+              <div class="db-lead-type">Web Form · New matter inquiry</div>
+            </div>
+            <div class="urgency urgency-high">HIGH</div>
+          </div>
+          <div class="db-lead">
+            <div>
+              <div class="db-lead-name">Dana Roberts</div>
+              <div class="db-lead-business">Roberts Family Dental</div>
+              <div class="db-lead-type">AI Voice · Missed call follow-up</div>
+            </div>
+            <div class="urgency urgency-normal">NORMAL</div>
+          </div>
+          <div class="db-lead">
+            <div>
+              <div class="db-lead-name">Carlos Mendez</div>
+              <div class="db-lead-business">Mendez Roofing Co.</div>
+              <div class="db-lead-type">Intake Engine · Storm damage</div>
+            </div>
+            <div class="urgency urgency-high">HIGH</div>
+          </div>
+        </div>
+        <div class="db-footer">
+          <a class="db-launch-btn" href="flowdesk-lead-manager-dashboard.html">
+            Open Full Dashboard →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-eyebrow">Dashboard Features</div>
+      <h2 class="section-title" style="margin-bottom:2rem;">Everything you need to manage leads — nothing you don't.</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h4>Real-Time Updates</h4>
+          <p>Lead records appear the moment a call ends or a form is submitted. Supabase Realtime subscription means zero refresh needed.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔴</div>
+          <h4>Urgency Scoring</h4>
+          <p>Every record is scored by urgency — Urgent, High, Normal, Low. AI flags emergency language automatically. Urgent leads surface first.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🗂️</div>
+          <h4>Source Tracking</h4>
+          <p>Know exactly where every lead came from — AI Voice call, web form intake, missed-call text-back, or email. Full source attribution.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h4>Mark &amp; Resolve</h4>
+          <p>One-click to mark a lead as contacted, resolved, or follow-up needed. Status updates sync across the dashboard instantly.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h4>Filter &amp; Search</h4>
+          <p>Filter by urgency, source, status, or date. Full-text search across lead records. Find any record in seconds.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h4>Volume Analytics</h4>
+          <p>Daily totals, resolution rates, urgency breakdown, and source mix — all visible at a glance on the overview panel.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROI -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-eyebrow">The ROI Case</div>
+      <h2 class="section-title" style="margin-bottom:2rem;">What unmanaged leads cost your business every week.</h2>
+      <div class="roi-grid">
+        <div class="roi-card">
+          <div class="roi-number">78%</div>
+          <h4>Leads go cold in 1 hour</h4>
+          <p>Speed-to-contact is the #1 predictor of close rate. FlowDesk delivers the record — with full context — the moment the inquiry happens.</p>
+        </div>
+        <div class="roi-card">
+          <div class="roi-number">3x</div>
+          <h4>More follow-up when organized</h4>
+          <p>Teams with a structured lead view follow up 3x more consistently than teams relying on voicemail and sticky notes.</p>
+        </div>
+        <div class="roi-card">
+          <div class="roi-number">100%</div>
+          <h4>Nothing falls through</h4>
+          <p>Every record is written to Supabase. Nothing lives in someone's inbox or voicemail. Every lead is visible, trackable, and actionable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section" style="border-bottom:none;">
+    <div class="section-inner" style="text-align:center;">
+      <div class="section-eyebrow">Live Demo</div>
+      <h2 class="section-title" style="max-width:600px;margin:0 auto 1rem;">Launch the live Lead Manager dashboard.</h2>
+      <p class="section-sub" style="max-width:500px;margin:0 auto 2.5rem;">The demo dashboard is pre-loaded with real sample records across HVAC, dental, legal, and roofing verticals. Try sorting, filtering, and marking records resolved.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.85rem;justify-content:center;">
+        <a class="btn-primary" href="flowdesk-lead-manager-dashboard.html">Open Lead Manager Dashboard →</a>
+        <a class="btn-secondary" href="/#pricing">View Pricing</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">
+      <img src="AI4-FLOWDESK-PRO-LOGO.png" alt="FlowDesk Pro" />
+      <div>
+        <div class="footer-entity">Apropos Group LLC · AI4 Businesses</div>
+        <div class="footer-entity" style="margin-top:2px;">© 2026 FlowDesk Pro</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="/" style="font-size:0.78rem;color:var(--muted2);" onmouseover="this.style.color='var(--accent3)'" onmouseout="this.style.color='var(--muted2)'">Home</a>
+      <a href="demo-voice.html" style="font-size:0.78rem;color:var(--muted2);" onmouseover="this.style.color='var(--accent3)'" onmouseout="this.style.color='var(--muted2)'">AI Voice</a>
+      <a href="demo-intake.html" style="font-size:0.78rem;color:var(--muted2);" onmouseover="this.style.color='var(--accent3)'" onmouseout="this.style.color='var(--muted2)'">Intake Engine</a>
+      <a href="privacy.html" style="font-size:0.78rem;color:var(--muted2);" onmouseover="this.style.color='var(--accent3)'" onmouseout="this.style.color='var(--muted2)'">Privacy</a>
+    </div>
+  </footer>
+
+</body>
+</html>
