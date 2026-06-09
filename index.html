@@ -152,10 +152,13 @@ fill();
     if (pt.diff) { var d=$("q_diff"); if(d) d.value=pt.diff; }
     if (pt.else) { var e=$("q_else"); if(e) e.value=pt.else; }
     // Hide intake form and expand preview to full width
+    // Hide form fields, keep action buttons
+    var toHide = document.querySelectorAll('.panel .field, .panel .step, .panel .sub, .panel h2, .panel .grid2');
+    toHide.forEach(function(el){ el.style.display='none'; });
     var panel = document.querySelector('.panel');
     var stage = document.querySelector('.stage');
-    if (panel) panel.style.display = 'none';
-    if (stage) stage.style.gridTemplateColumns = '1fr';
+    if (panel){ panel.style.maxWidth='190px'; panel.style.padding='12px 10px'; }
+    if (stage) stage.style.gridTemplateColumns='190px 1fr';
     // Fire Claude immediately
     setTimeout(function(){ generate(true,true); }, 150);
   } catch(ex) { console.warn('Passthrough error',ex); }
@@ -193,11 +196,11 @@ function parseJSON(text){const c=text.replace(/```json|```/g,"").trim();
   const s=c.indexOf("{"),e=c.lastIndexOf("}");return JSON.parse(c.slice(s,e>=0?e+1:undefined));}
 
 /* ---------- (1) production: your Netlify function ---------- */
-async function viaFunction(answers,mode){
+async function viaFunction(answers,mode,existingContent){
   const res=await fetch(FN_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({answers,mode})});
+    body:JSON.stringify({answers,mode,existingContent:existingContent||null})});
   if(!res.ok) throw new Error("fn "+res.status);
-  return res.json(); // {content, design}
+  return res.json(); // {html, content}
 }
 /* ---------- (2) demo: in-page model call (claude.ai artifact only) ---------- */
 async function viaDemoAPI(answers,mode){
@@ -333,32 +336,31 @@ function buildSite(content,design){
 /* =================== ORCHESTRATION =================== */
 let cur=null;            // {content, design}
 function render(){
-  if(!cur) return;
-  const doc=buildSite(cur.content,cur.design);
-  $("frame").srcdoc=doc;
+  if(!cur||!cur.html) return;
+  $("frame").srcdoc=cur.html;
   $("empty").style.display="none";
-  const d=norm(cur.design), pv=$("pvstyle");
+  const pv=$("pvstyle");
   pv.style.display="flex";
-  pv.innerHTML=`<span class="sw" style="background:${d.accent}"></span>${esc((cur.design&&cur.design.mood)||d.layout)} · ${esc(d.fd)}`;
-  const site=(cur.content.contact&&cur.content.contact.site)||(cur.content.brand||"site").toLowerCase().replace(/[^a-z0-9]+/g,"")+".com";
-  $("pvurl").textContent="https://"+site;
+  pv.innerHTML="AI Freestyle Design";
+  const brand=(cur.content&&cur.content.brand)||"site";
+  $("pvurl").textContent="https://"+brand.toLowerCase().replace(/[^a-z0-9]+/g,"")+".com";
   $("selectBtn").style.display="block";
 }
 function busy(b,msg){$("go").disabled=b;$("go").textContent=b?"Generating…":"Generate site →";
   if(b){$("empty").style.display="flex";$("empty").innerHTML='<div class="spinner"></div><div class="pulse">'+(msg||"Writing copy & designing…")+'</div>';}}
 
-async function obtain(answers,mode){
-  // try production function, then demo API, then local. returns {content,design,via}
-  try{ const r=await viaFunction(answers,mode); return {...r,via:"your Netlify function"}; }catch(e){}
-  try{ const r=await viaDemoAPI(answers,mode); return {...r,via:"demo AI (Claude)"}; }catch(e){}
-  return {content:localContent(answers),design:randomDesign(),via:"built-in writer (offline)"};
+async function obtain(answers,mode,existingContent){
+  try{ const r=await viaFunction(answers,mode,existingContent); return {...r,via:"Claude AI (freestyle)"}; }catch(e){}
+  try{ const r=await viaDemoAPI(answers,mode); const html=buildSite(r.content,r.design); return {html,content:r.content,via:"demo AI"}; }catch(e){}
+  const fc=localContent(answers); return {html:buildSite(fc,randomDesign()),content:fc,via:"built-in writer"};
 }
 async function generate(newCopy,newDesign){
   const a=readAnswers(); busy(true);
-  const r=await obtain(a,newCopy?"full":"design");
+  const existing=(!newCopy&&cur&&cur.content)?cur.content:null;
+  const r=await obtain(a,newCopy?"full":"design",existing);
   if(!cur) cur={};
-  if(newCopy){ cur.content=r.content; cur.content.contact={site:a.site,email:a.email,addr:a.addr}; }
-  if(newDesign||!cur.design){ cur.design=r.design; }
+  cur.html=r.html;
+  if(newCopy||!cur.content){ cur.content=r.content; if(cur.content)cur.content.contact={site:a.site,email:a.email,addr:a.addr}; }
   $("hint").textContent="✓ via "+r.via;
   busy(false); render();
 }
@@ -373,17 +375,19 @@ async function selectAndCheckout(){
   const userId=p.get('m')||'';
   const email=p.get('e')?decodeURIComponent(p.get('e')):'';
   const name=p.get('n')?decodeURIComponent(p.get('n')):'';
-  if(!email){alert("Session expired — please return to ai4websitedesign.com and sign in again.");return;}
+  const ssEmail=(function(){try{return sessionStorage.getItem('ai4_email')||sessionStorage.getItem('user_email')||'';}catch(e){return '';}})();
+  const email_=email||ssEmail;
+  if(!email_){alert("Please sign up first — return to ai4websitedesign.com.");return;}
   const btn=$("selectBtn");
   btn.disabled=true; btn.textContent="Saving your site…";
   try{
     const answers=readAnswers();
-    const html=buildSite(cur.content,cur.design);
+    const html=cur.html||buildSite(cur.content||{},cur.design||{});
     // 1. Persist the chosen site before leaving this page
     const saveRes=await fetch("https://ai4websitedesign.com/.netlify/functions/save-build",{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        email, user_id:userId, full_name:name,
+        email:email_, user_id:userId, full_name:name,
         business_name:answers.name||"Website Build",
         built_html:html,
         site_data:{content:cur.content,design:cur.design,answers},
@@ -398,14 +402,14 @@ async function selectAndCheckout(){
     btn.textContent="Sending your access code…";
     await fetch("https://ai4websitedesign.com/.netlify/functions/send-otp",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email})
+      body:JSON.stringify({email:email_})
     }).catch(()=>{});
     // 3. Redirect to product purchasing site with site reference
     btn.textContent="✓ Check your email for your access code";
     setTimeout(()=>{
       const url=new URL("https://ai4-product-purchasing.ai4businesses.org/");
       url.searchParams.set("site",siteId);
-      url.searchParams.set("e",encodeURIComponent(email));
+      url.searchParams.set("e",encodeURIComponent(email_));
       location.href=url.toString();
     },1800);
   }catch(err){
