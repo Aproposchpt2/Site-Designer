@@ -1,53 +1,86 @@
 // netlify/functions/generate.mjs
-// Secure server step. The Anthropic key is read from an environment variable
-// you set in Netlify (Site settings -> Environment variables). It is NEVER
-// sent to the browser — the visitor's page calls THIS function, and this
-// function calls Anthropic.
+// Freestyle HTML generator — Claude writes the complete HTML, no templates, no schema.
+// Every run produces a genuinely different site with its own layout, palette, and copy.
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
 
-const DISPLAY_FONTS = ["Fraunces","Bodoni Moda","Cormorant","Sora","Instrument Serif","Newsreader","Jost"];
-const BODY_FONTS    = ["Newsreader","Jost","Sora","Cormorant"];
-const MONO_FONTS     = ["Spline Sans Mono","IBM Plex Mono"];
-const LAYOUTS  = ["centered","editorial","cards"];
-const SURFACES = ["glass","bordered","paper"];
-const TEXTURES = ["aurora","grain","none"];
-const SHAPES   = ["pill","square","underline"];
-
-const SCHEMA_PROMPT =
-  "Return ONLY a JSON object (no markdown, no prose) shaped exactly as: "
-  + '{"content":{"brand":string,"category":string(2-3 words),"eyebrow":string(2-4 words),'
-  + '"headline":string(<=10 words),"standfirst":string(1-2 sentences),"stats":[3 short strings],'
-  + '"sections":[4 {"title":string(<=6 words),"blurb":string(1 sentence),"points":[3 short strings]}],'
-  + '"closeHeadline":string(<=8 words),"closeText":string(1 sentence),"cta":string(2-4 words)},'
-  + '"design":{"mood":string,"theme":"dark"|"light",'
-  + '"palette":{"bg":hex,"surface":hex,"ink":hex,"inkSoft":hex,"accent":hex,"accent2":hex},'
-  + '"fonts":{"display":one of ' + JSON.stringify(DISPLAY_FONTS) + ',"body":one of ' + JSON.stringify(BODY_FONTS) + ',"mono":one of ' + JSON.stringify(MONO_FONTS) + '},'
-  + '"layout":one of ' + JSON.stringify(LAYOUTS) + ',"surfaceStyle":one of ' + JSON.stringify(SURFACES) + ',"texture":one of ' + JSON.stringify(TEXTURES) + ','
-  + '"radius":int 0-26,"displayWeight":int 300-800,"accentShape":one of ' + JSON.stringify(SHAPES) + '}}. '
-  + "Invent a fresh, cohesive, tasteful palette and an unexpected but harmonious font pairing. Make the design feel specifically right for THIS business and noticeably different each time. Copy must be concrete and confident, with no clichés.";
-
-function parseJSON(text) {
-  const c = text.replace(/```json|```/g, "").trim();
-  const s = c.indexOf("{"), e = c.lastIndexOf("}");
-  return JSON.parse(c.slice(s, e >= 0 ? e + 1 : undefined));
-}
-
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
-
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return json({ error: "Server missing ANTHROPIC_API_KEY env var" }, 500);
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "bad json" }, 400); }
-  const a = body.answers || {};
-  const mode = body.mode === "design" ? "design" : "full";
 
-  const ctx = `Business name: ${a.name || ""}\nWhat it does: ${a.what || ""}\nIdeal customers: ${a.who || ""}\nDifferentiator: ${a.diff || ""}\nAlso: ${a.else || ""}`;
-  const ask = (mode === "design"
-    ? "Keep the wording implied by the business but design a brand-new, distinct look. "
-    : "") + SCHEMA_PROMPT;
+  const a = body.answers || {};
+  const mode = body.mode || "full";
+  const existingContent = body.existingContent || null;
+
+  const ctx = [
+    a.name  ? `Business: ${a.name}`          : null,
+    a.what  ? `What they do: ${a.what}`       : null,
+    a.who   ? `Ideal customers: ${a.who}`     : null,
+    a.diff  ? `Differentiator: ${a.diff}`     : null,
+    a.else  ? `Additional context: ${a.else}` : null,
+    a.site  ? `Website: ${a.site}`            : null,
+    a.email ? `Email: ${a.email}`             : null,
+    a.addr  ? `Address: ${a.addr}`            : null,
+  ].filter(Boolean).join('\n');
+
+  let prompt;
+
+  if (mode === "design" && existingContent) {
+    prompt = `You are an elite web designer. Rebuild this business website with a COMPLETELY DIFFERENT visual design.
+
+REUSE THIS CONTENT EXACTLY (same brand name, same copy, same information):
+Brand: ${existingContent.brand || a.name || ""}
+${existingContent.context || ctx}
+
+DESIGN RULES — make it dramatically different from the previous version:
+- Completely different color palette and mood (dark vs light, warm vs cool, minimal vs bold)
+- Different layout structure (asymmetric grid, full-bleed sections, split screens, overlapping layers)
+- Different typography personality (editorial serif vs geometric sans vs expressive display)
+- Different section order and visual hierarchy
+- Pretend a different designer with a different aesthetic philosophy built this
+
+Technical requirements:
+- Complete standalone HTML — all CSS in <style> in <head>
+- Load 1-2 Google Fonts via <link> in <head>
+- Fully mobile responsive with CSS media queries
+- Sections: hero, services/offerings, differentiator/about, contact form, footer
+- Contact form with data-netlify="true" and name/email/phone/message fields
+- No external JavaScript libraries
+- CSS custom properties for color system
+
+Return ONLY the HTML starting with <!DOCTYPE html>. No markdown. No explanation.`;
+  } else {
+    prompt = `You are an elite web designer and copywriter. Build a complete, launch-ready business website.
+
+BUSINESS DETAILS:
+${ctx || "A premium business that delivers exceptional value to its customers."}
+
+YOUR MANDATE — create without constraints:
+- Write all copy from scratch: headlines, taglines, service descriptions, CTAs, footer
+- Invent a visual identity that feels specifically right for this business
+- BREAK OUT of generic templates — no cookie-cutter hero/features/CTA patterns
+- Try unexpected approaches: magazine layouts, editorial grids, bold asymmetry, cinematic heroes
+- Choose colors, fonts, and spacing that create a distinct mood and personality
+- Every generation must look completely different from every other — vary everything
+
+Inspire yourself: luxury editorial, brutalist tech, warm artisan, dark cinematic, clean minimal, bold expressive — pick a direction that fits the business and commit to it fully.
+
+Technical requirements:
+- Complete standalone HTML — all CSS in <style> in <head>
+- Load 1-2 Google Fonts via <link> in <head>
+- Fully mobile responsive with CSS media queries
+- Include: hero section, services/offerings section, why-choose-us/differentiator section, contact form section, footer
+- Contact form: data-netlify="true", fields for name/email/phone/message, submit button
+- No external JavaScript libraries
+- CSS custom properties (--color-bg, --color-text, --color-accent, etc.) for the color system
+- Production quality: not a mockup, not a wireframe
+
+Return ONLY the HTML starting with <!DOCTYPE html>. No markdown code fences. No explanation.`;
+  }
 
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -59,21 +92,34 @@ export default async (req) => {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 1600,
-        messages: [{ role: "user", content: ask + "\n\n" + ctx }]
+        max_tokens: 8000,
+        messages: [{ role: "user", content: prompt }]
       })
     });
+
     if (!r.ok) {
       const t = await r.text();
       return json({ error: "anthropic " + r.status, detail: t.slice(0, 400) }, 502);
     }
+
     const data = await r.json();
-    const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-    const obj = parseJSON(text);
-    // attach contact passthrough so the renderer can show it
-    obj.content = obj.content || {};
-    obj.content.contact = { site: a.site || "", email: a.email || "", addr: a.addr || "" };
-    return json(obj, 200);
+    const rawText = (data.content || [])
+      .filter(b => b.type === "text")
+      .map(b => b.text)
+      .join("");
+
+    // Strip markdown code blocks if Claude wrapped the output
+    const html = rawText
+      .replace(/^```html\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/, '')
+      .trim();
+
+    return json({
+      html,
+      content: { brand: a.name || "Your Business", context: ctx }
+    }, 200);
+
   } catch (err) {
     return json({ error: "generation failed", detail: String(err).slice(0, 300) }, 500);
   }
