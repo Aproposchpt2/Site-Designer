@@ -139,6 +139,21 @@ function fill(){
   // Business questions are left blank — this is their site, their words
 }
 fill();
+
+// ── Passthrough from ai4-design-studio questionnaire ──
+(function(){
+  var ptMode = new URLSearchParams(location.search).get('mode');
+  if (ptMode !== 'passthrough') return;
+  try {
+    var pt = JSON.parse(sessionStorage.getItem('ai4_passthrough') || '{}');
+    if (pt.name) { var n=$("q_name"); if(n) n.value=pt.name; }
+    if (pt.what) { var w=$("q_what"); if(w) w.value=pt.what; }
+    if (pt.who)  { var o=$("q_who");  if(o) o.value=pt.who;  }
+    if (pt.diff) { var d=$("q_diff"); if(d) d.value=pt.diff; }
+    if (pt.else) { var e=$("q_else"); if(e) e.value=pt.else; }
+    setTimeout(function(){ generate(true,true); }, 400);
+  } catch(ex) { console.warn('Passthrough error',ex); }
+})();
 function readAnswers(){return{name:$("q_name").value.trim()||"Your Business",what:$("q_what").value.trim(),
   who:$("q_who").value.trim(),diff:$("q_diff").value.trim(),else:$("q_else").value.trim(),
   site:$("c_site").value.trim(),email:$("c_email").value.trim(),addr:$("c_addr").value.trim()};}
