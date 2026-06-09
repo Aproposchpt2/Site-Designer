@@ -151,7 +151,13 @@ fill();
     if (pt.who)  { var o=$("q_who");  if(o) o.value=pt.who;  }
     if (pt.diff) { var d=$("q_diff"); if(d) d.value=pt.diff; }
     if (pt.else) { var e=$("q_else"); if(e) e.value=pt.else; }
-    setTimeout(function(){ generate(true,true); }, 400);
+    // Hide intake form and expand preview to full width
+    var panel = document.querySelector('.panel');
+    var stage = document.querySelector('.stage');
+    if (panel) panel.style.display = 'none';
+    if (stage) stage.style.gridTemplateColumns = '1fr';
+    // Fire Claude immediately
+    setTimeout(function(){ generate(true,true); }, 150);
   } catch(ex) { console.warn('Passthrough error',ex); }
 })();
 function readAnswers(){return{name:$("q_name").value.trim()||"Your Business",what:$("q_what").value.trim(),
