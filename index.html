@@ -407,7 +407,9 @@ async function selectAndCheckout(){
     // 3. Redirect to product purchasing site with site reference
     btn.textContent="✓ Check your email for your access code";
     setTimeout(()=>{
-      const url=new URL("https://ai4-product-purchasing.ai4businesses.org/Website-signup-intake");
+      const ptLang=new URLSearchParams(location.search).get('lang')||'en';
+    const intakePath=ptLang==='es'?'/Website-signup-intake-es.html':'/Website-signup-intake';
+    const url=new URL("https://ai4-product-purchasing.ai4businesses.org"+intakePath);
       url.searchParams.set("site",siteId);
       url.searchParams.set("e",encodeURIComponent(email_));
       location.href=url.toString();
