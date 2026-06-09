@@ -145,7 +145,7 @@ fill();
   var ptMode = new URLSearchParams(location.search).get('mode');
   if (ptMode !== 'passthrough') return;
   try {
-    var pt = JSON.parse(sessionStorage.getItem('ai4_passthrough') || '{}');
+    var _raw=new URLSearchParams(location.search).get('d')||'';var pt={};try{if(_raw)pt=JSON.parse(decodeURIComponent(escape(atob(_raw))));}catch(ex2){}
     if (pt.name) { var n=$("q_name"); if(n) n.value=pt.name; }
     if (pt.what) { var w=$("q_what"); if(w) w.value=pt.what; }
     if (pt.who)  { var o=$("q_who");  if(o) o.value=pt.who;  }
