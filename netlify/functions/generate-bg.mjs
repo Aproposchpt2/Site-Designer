@@ -1,8 +1,7 @@
 // netlify/functions/generate-bg.mjs
-// Background Function using Netlify Blobs — zero external DB needed
-// Flow: POST → store job in Blobs → return jobId → Claude generates → update Blobs
+// Uses /tmp for job storage — available in all Netlify functions, no dependencies
 
-import { getStore } from "@netlify/blobs";
+import { writeFileSync, readFileSync, existsSync } from "fs";
 
 const MODEL    = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
 const ANTH_KEY = process.env.ANTHROPIC_API_KEY;
@@ -16,6 +15,20 @@ const HEADERS = {
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: HEADERS });
+}
+
+function jobPath(id) {
+  return `/tmp/ai4_${id}.json`;
+}
+
+function writeJob(id, data) {
+  writeFileSync(jobPath(id), JSON.stringify(data));
+}
+
+function readJob(id) {
+  const p = jobPath(id);
+  if (!existsSync(p)) return null;
+  return JSON.parse(readFileSync(p, "utf8"));
 }
 
 function buildPrompt(a) {
@@ -46,7 +59,7 @@ Contact Information:
 ${contact || "None provided"}
 
 YOUR MANDATE:
-1. INVENT a completely unique visual identity — colors, fonts, layout — built specifically for this business and industry. Never use a generic blue-white tech look for non-tech businesses.
+1. INVENT a completely unique visual identity — colors, fonts, layout — built specifically for this business and industry. Never use generic blue-white tech look for non-tech businesses.
 2. WRITE real compelling copy specific to this business. Zero placeholder text. Zero generic phrases.
 3. DESIGN for their industry — a barbershop must look nothing like a law firm.
 4. Include ALL contact details as clickable links in the contact section.
@@ -72,11 +85,10 @@ export default async (req) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
-  const jobId  = crypto.randomUUID();
-  const store  = getStore("ai4-jobs");
+  const jobId = crypto.randomUUID();
 
-  // Write initial pending state
-  await store.setJSON(jobId, { status: "pending", html: null, created: Date.now() });
+  // Write pending state to /tmp
+  writeJob(jobId, { status: "pending", html: null });
 
   // Fire Claude in background
   (async () => {
@@ -105,11 +117,11 @@ export default async (req) => {
       let html = data.content[0].text.trim();
       html = html.replace(/^```html\s*/i,"").replace(/^```\s*/i,"").replace(/\s*```$/i,"").trim();
 
-      await store.setJSON(jobId, { status: "done", html, created: Date.now() });
+      writeJob(jobId, { status: "done", html });
       console.log("[generate-bg] Job complete:", jobId);
     } catch (err) {
-      console.error("[generate-bg] Job failed:", jobId, err.message);
-      await store.setJSON(jobId, { status: "error", html: null, error: err.message });
+      console.error("[generate-bg] Job failed:", err.message);
+      writeJob(jobId, { status: "error", html: null, error: err.message });
     }
   })();
 

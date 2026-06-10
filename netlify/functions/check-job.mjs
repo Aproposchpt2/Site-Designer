@@ -1,8 +1,7 @@
 // netlify/functions/check-job.mjs
-// Polling endpoint — browser calls this every 3 seconds to check job status
-// GET /api/check-job?id=<jobId>
+// Reads job status from /tmp — same instance as generate-bg
 
-import { getStore } from "@netlify/blobs";
+import { readFileSync, existsSync } from "fs";
 
 const HEADERS = {
   "Content-Type":                "application/json",
@@ -20,23 +19,19 @@ export default async (req) => {
 
   const url   = new URL(req.url);
   const jobId = url.searchParams.get("id");
+  if (!jobId) return json({ error: "Missing id" }, 400);
 
-  if (!jobId) return json({ error: "Missing id parameter" }, 400);
+  // Sanitize jobId — UUID only
+  if (!/^[0-9a-f-]{36}$/.test(jobId)) return json({ error: "Invalid id" }, 400);
+
+  const path = `/tmp/ai4_${jobId}.json`;
+  if (!existsSync(path)) return json({ status: "pending" });
 
   try {
-    const store = getStore("ai4-jobs");
-    const job   = await store.get(jobId, { type: "json" });
-
-    if (!job) return json({ status: "not_found" }, 404);
-
-    return json({
-      status: job.status,
-      html:   job.status === "done" ? job.html : null,
-      error:  job.error || null,
-    });
-  } catch (err) {
-    console.error("[check-job] Error:", err.message);
-    return json({ error: err.message }, 500);
+    const job = JSON.parse(readFileSync(path, "utf8"));
+    return json({ status: job.status, html: job.html || null, error: job.error || null });
+  } catch {
+    return json({ status: "pending" });
   }
 };
 
