@@ -1,11 +1,11 @@
 // netlify/functions/generate-bg.mjs
-// Background Function — no timeout issue, runs up to 15 minutes
-// Uses fetch (no SDK) to match generate.mjs — no package.json needed
+// Background Function using Netlify Blobs — zero external DB needed
+// Flow: POST → store job in Blobs → return jobId → Claude generates → update Blobs
+
+import { getStore } from "@netlify/blobs";
 
 const MODEL    = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
 const ANTH_KEY = process.env.ANTHROPIC_API_KEY;
-const SUP_URL  = process.env.SUPABASE_URL;
-const SUP_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 const HEADERS = {
   "Content-Type":                "application/json",
@@ -46,9 +46,9 @@ Contact Information:
 ${contact || "None provided"}
 
 YOUR MANDATE:
-1. INVENT a completely unique visual identity — colors, fonts, layout — that fits THIS specific business and industry. Never use generic blue-white tech look for non-tech businesses.
-2. WRITE real compelling copy specific to this business. Zero placeholder text. Zero generic phrases like "welcome to" or "dedicated to excellence."
-3. DESIGN for their industry — a barbershop must look nothing like a law firm. A gospel artist must look nothing like a restaurant.
+1. INVENT a completely unique visual identity — colors, fonts, layout — built specifically for this business and industry. Never use a generic blue-white tech look for non-tech businesses.
+2. WRITE real compelling copy specific to this business. Zero placeholder text. Zero generic phrases.
+3. DESIGN for their industry — a barbershop must look nothing like a law firm.
 4. Include ALL contact details as clickable links in the contact section.
 5. Mobile responsive with media queries.
 6. Contact form: <form name="contact" method="POST" data-netlify="true"><input type="hidden" name="form-name" value="contact">
@@ -59,65 +59,10 @@ SECTIONS: Navigation + Hero + Services + Why Choose Them + Contact + Footer
 Return ONLY the complete HTML. Start with <!DOCTYPE html>. No explanation. No markdown.`;
 }
 
-async function createJob(jobId, answers) {
-  console.log("[generate-bg] SUPABASE_URL:", SUP_URL);
-  console.log("[generate-bg] SUP_KEY set:", !!SUP_KEY);
-  console.log("[generate-bg] Table: ai4_site_builds");
-  const res = await fetch(`${SUP_URL}/rest/v1/ai4_site_builds`, {
-    method: "POST",
-    headers: {
-      "Content-Type":  "application/json",
-      "apikey":        SUP_KEY,
-      "Authorization": "Bearer " + SUP_KEY,
-      "Prefer":        "return=minimal",
-    },
-    body: JSON.stringify({ id: jobId, status: "pending", html: null, answers }),
-  });
-  if (!res.ok) throw new Error("Supabase insert failed: " + await res.text());
-}
-
-async function updateJob(jobId, status, html = null) {
-  await fetch(`${SUP_URL}/rest/v1/ai4_site_builds?id=eq.${jobId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type":  "application/json",
-      "apikey":        SUP_KEY,
-      "Authorization": "Bearer " + SUP_KEY,
-    },
-    body: JSON.stringify({ status, html, updated_at: new Date().toISOString() }),
-  });
-}
-
-async function generateWithClaude(answers) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type":      "application/json",
-      "x-api-key":         ANTH_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model:      MODEL,
-      max_tokens: 4096,
-      messages:   [{ role: "user", content: buildPrompt(answers) }],
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error("Claude error: " + (err.error?.message || res.status));
-  }
-  const data = await res.json();
-  let html = data.content[0].text.trim();
-  html = html.replace(/^```html\s*/i,"").replace(/^```\s*/i,"").replace(/\s*```$/i,"").trim();
-  return html;
-}
-
 export default async (req) => {
   if (req.method === "OPTIONS") return json({}, 200);
   if (req.method !== "POST")    return json({ error: "POST only" }, 405);
   if (!ANTH_KEY) return json({ error: "ANTHROPIC_API_KEY not set" }, 500);
-  if (!SUP_URL)  return json({ error: "SUPABASE_URL not set" }, 500);
-  if (!SUP_KEY)  return json({ error: "SUPABASE_SERVICE_ROLE_KEY not set" }, 500);
 
   let answers;
   try {
@@ -127,25 +72,44 @@ export default async (req) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
-  const jobId = crypto.randomUUID();
+  const jobId  = crypto.randomUUID();
+  const store  = getStore("ai4-jobs");
 
-  try {
-    await createJob(jobId, answers);
-  } catch (err) {
-    console.error("[generate-bg] createJob failed:", err.message);
-    return json({ error: "Could not create job: " + err.message }, 500);
-  }
+  // Write initial pending state
+  await store.setJSON(jobId, { status: "pending", html: null, created: Date.now() });
 
-  // Fire and forget — Claude runs after response is sent
+  // Fire Claude in background
   (async () => {
     try {
-      console.log("[generate-bg] Generating for job:", jobId);
-      const html = await generateWithClaude(answers);
-      await updateJob(jobId, "done", html);
+      console.log("[generate-bg] Starting job:", jobId, "for:", answers.name);
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type":      "application/json",
+          "x-api-key":         ANTH_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model:      MODEL,
+          max_tokens: 4096,
+          messages:   [{ role: "user", content: buildPrompt(answers) }],
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || "Claude API error " + res.status);
+      }
+
+      const data = await res.json();
+      let html = data.content[0].text.trim();
+      html = html.replace(/^```html\s*/i,"").replace(/^```\s*/i,"").replace(/\s*```$/i,"").trim();
+
+      await store.setJSON(jobId, { status: "done", html, created: Date.now() });
       console.log("[generate-bg] Job complete:", jobId);
     } catch (err) {
       console.error("[generate-bg] Job failed:", jobId, err.message);
-      await updateJob(jobId, "error", null).catch(() => {});
+      await store.setJSON(jobId, { status: "error", html: null, error: err.message });
     }
   })();
 
