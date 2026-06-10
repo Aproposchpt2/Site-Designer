@@ -1,20 +1,25 @@
-// generate-bg.mjs — Netlify Background Function
-// Returns job_id immediately, runs Claude in background, writes result to Supabase
-// Deploy to: netlify/functions/generate-bg.mjs
-// Netlify background functions run up to 15 minutes — no timeout issue
+// netlify/functions/generate-bg.mjs
+// Background Function — no timeout issue, runs up to 15 minutes
+// Uses fetch (no SDK) to match generate.mjs — no package.json needed
 
-import Anthropic from '@anthropic-ai/sdk';
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const MODEL    = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
+const ANTH_KEY = process.env.ANTHROPIC_API_KEY;
+const SUP_URL  = process.env.SUPABASE_URL;
+const SUP_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 const HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
+  "Content-Type":                "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":"Content-Type",
+  "Access-Control-Allow-Methods":"POST, OPTIONS",
 };
 
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: HEADERS });
+}
+
 function buildPrompt(a) {
+  const year = new Date().getFullYear();
   const contact = [
     a.phone     ? `Phone: ${a.phone}`         : null,
     a.email     ? `Email: ${a.email}`         : null,
@@ -25,95 +30,123 @@ function buildPrompt(a) {
     a.tiktok    ? `TikTok: ${a.tiktok}`       : null,
     a.youtube   ? `YouTube: ${a.youtube}`     : null,
     a.linkedin  ? `LinkedIn: ${a.linkedin}`   : null,
-  ].filter(Boolean).join('\n');
+  ].filter(Boolean).join("\n");
 
-  return `You are a world-class marketing agency creative director and web designer.
+  return `You are a world-class marketing agency creative director and web designer combined.
 
-Build a COMPLETE, UNIQUE, PRODUCTION-READY promotional website as a single HTML file.
+A real client filled out an intake form. Build them a COMPLETE, UNIQUE, PRODUCTION-READY promotional website as a single HTML file.
 
 CLIENT BRIEF:
-Business Name: ${a.name || 'Your Business'}
-What They Do: ${a.what || 'Not specified'}
-Ideal Customers: ${a.who || 'Not specified'}
-What Makes Them Different: ${a.diff || 'Not specified'}
-Additional Notes: ${a.else || 'None'}
-Contact:
-${contact || 'None provided'}
+Business Name: ${a.name || "Your Business"}
+What They Do: ${a.what || "Not specified"}
+Ideal Customers: ${a.who || "Not specified"}
+What Makes Them Different: ${a.diff || "Not specified"}
+Additional Notes: ${a.else || "None"}
+Contact Information:
+${contact || "None provided"}
 
-RULES:
-- Invent a completely unique visual identity for THIS business and industry
-- Write real specific copy — zero placeholder text, zero generic phrases
-- A barbershop must not look like a law firm
-- Include all contact details as clickable links
-- Mobile responsive
-- Contact form: <form name="contact" method="POST" data-netlify="true">
-- Sections: Nav + Hero + Services + Why Choose Them + Contact + Footer
+YOUR MANDATE:
+1. INVENT a completely unique visual identity — colors, fonts, layout — that fits THIS specific business and industry. Never use generic blue-white tech look for non-tech businesses.
+2. WRITE real compelling copy specific to this business. Zero placeholder text. Zero generic phrases like "welcome to" or "dedicated to excellence."
+3. DESIGN for their industry — a barbershop must look nothing like a law firm. A gospel artist must look nothing like a restaurant.
+4. Include ALL contact details as clickable links in the contact section.
+5. Mobile responsive with media queries.
+6. Contact form: <form name="contact" method="POST" data-netlify="true"><input type="hidden" name="form-name" value="contact">
+7. Footer: © ${year} ${a.name || "Your Business"}. All rights reserved.
 
-Return ONLY the HTML. Start with <!DOCTYPE html>. No markdown.`;
+SECTIONS: Navigation + Hero + Services + Why Choose Them + Contact + Footer
+
+Return ONLY the complete HTML. Start with <!DOCTYPE html>. No explanation. No markdown.`;
 }
 
-async function createJob() {
-  const id = crypto.randomUUID();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/site_jobs`, {
-    method: 'POST',
+async function createJob(jobId, answers) {
+  const res = await fetch(`${SUP_URL}/rest/v1/site_jobs`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Prefer': 'return=representation',
+      "Content-Type":  "application/json",
+      "apikey":        SUP_KEY,
+      "Authorization": "Bearer " + SUP_KEY,
+      "Prefer":        "return=minimal",
     },
-    body: JSON.stringify({ id, status: 'pending', html: null })
+    body: JSON.stringify({ id: jobId, status: "pending", html: null, answers }),
   });
-  if (!res.ok) throw new Error('Could not create job in Supabase');
-  return id;
+  if (!res.ok) throw new Error("Supabase insert failed: " + await res.text());
 }
 
-async function updateJob(id, status, html = null) {
-  await fetch(`${SUPABASE_URL}/rest/v1/site_jobs?id=eq.${id}`, {
-    method: 'PATCH',
+async function updateJob(jobId, status, html = null) {
+  await fetch(`${SUP_URL}/rest/v1/site_jobs?id=eq.${jobId}`, {
+    method: "PATCH",
     headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      "Content-Type":  "application/json",
+      "apikey":        SUP_KEY,
+      "Authorization": "Bearer " + SUP_KEY,
     },
-    body: JSON.stringify({ status, html })
+    body: JSON.stringify({ status, html, updated_at: new Date().toISOString() }),
   });
 }
 
-export const handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: HEADERS, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers: HEADERS, body: 'Method not allowed' };
+async function generateWithClaude(answers) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type":      "application/json",
+      "x-api-key":         ANTH_KEY,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model:      MODEL,
+      max_tokens: 4096,
+      messages:   [{ role: "user", content: buildPrompt(answers) }],
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error("Claude error: " + (err.error?.message || res.status));
+  }
+  const data = await res.json();
+  let html = data.content[0].text.trim();
+  html = html.replace(/^```html\s*/i,"").replace(/^```\s*/i,"").replace(/\s*```$/i,"").trim();
+  return html;
+}
 
-  const { answers } = JSON.parse(event.body || '{}');
+export default async (req) => {
+  if (req.method === "OPTIONS") return json({}, 200);
+  if (req.method !== "POST")    return json({ error: "POST only" }, 405);
+  if (!ANTH_KEY) return json({ error: "ANTHROPIC_API_KEY not set" }, 500);
+  if (!SUP_URL)  return json({ error: "SUPABASE_URL not set" }, 500);
+  if (!SUP_KEY)  return json({ error: "SUPABASE_SERVICE_ROLE_KEY not set" }, 500);
 
-  // Create job row in Supabase — this is instant
-  const jobId = await createJob();
+  let answers;
+  try {
+    const body = await req.json();
+    answers = body.answers || body;
+  } catch {
+    return json({ error: "Invalid JSON body" }, 400);
+  }
 
-  // Return job_id to browser immediately — don't await Claude
-  // The background function continues running after the response is sent
-  setImmediate(async () => {
+  const jobId = crypto.randomUUID();
+
+  try {
+    await createJob(jobId, answers);
+  } catch (err) {
+    console.error("[generate-bg] createJob failed:", err.message);
+    return json({ error: "Could not create job: " + err.message }, 500);
+  }
+
+  // Fire and forget — Claude runs after response is sent
+  (async () => {
     try {
-      const client = new Anthropic({ apiKey: ANTHROPIC_KEY });
-      const response = await client.messages.create({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
-        messages: [{ role: 'user', content: buildPrompt(answers) }]
-      });
-
-      let html = response.content[0].text.trim()
-        .replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-
-      await updateJob(jobId, 'done', html);
-      console.log('[generate-bg] Job', jobId, 'completed');
-    } catch(err) {
-      console.error('[generate-bg] Job', jobId, 'failed:', err.message);
-      await updateJob(jobId, 'error', null);
+      console.log("[generate-bg] Generating for job:", jobId);
+      const html = await generateWithClaude(answers);
+      await updateJob(jobId, "done", html);
+      console.log("[generate-bg] Job complete:", jobId);
+    } catch (err) {
+      console.error("[generate-bg] Job failed:", jobId, err.message);
+      await updateJob(jobId, "error", null).catch(() => {});
     }
-  });
+  })();
 
-  return {
-    statusCode: 202,
-    headers: HEADERS,
-    body: JSON.stringify({ jobId, status: 'pending' })
-  };
+  return json({ jobId, status: "pending" }, 202);
 };
+
+export const config = { path: "/api/generate-bg" };
