@@ -60,6 +60,9 @@ Return ONLY the complete HTML. Start with <!DOCTYPE html>. No explanation. No ma
 }
 
 async function createJob(jobId, answers) {
+  console.log("[generate-bg] SUPABASE_URL:", SUP_URL);
+  console.log("[generate-bg] SUP_KEY set:", !!SUP_KEY);
+  console.log("[generate-bg] Table: ai4_site_builds");
   const res = await fetch(`${SUP_URL}/rest/v1/ai4_site_builds`, {
     method: "POST",
     headers: {
