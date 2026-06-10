@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI4 Website Design Studio — Site Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#07080f;color:#f0f0f8;min-height:100vh;padding:2rem}
+h1{font-size:1.4rem;font-weight:700;margin-bottom:.3rem}
+.badge{display:inline-block;background:#1a1a3a;color:#6a8afa;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.25rem .7rem;border-radius:999px;margin-bottom:1.5rem}
+.form{max-width:700px;display:flex;flex-direction:column;gap:.9rem}
+label{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);display:block;margin-bottom:.3rem}
+input,textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.8rem 1rem;color:#fff;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:rgba(255,255,255,.35)}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,.25)}
+textarea{min-height:90px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.btn{background:#fff;color:#07080f;border:none;border-radius:6px;padding:.9rem 2rem;font-size:.88rem;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
+.btn:hover{opacity:.88}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.status{margin-top:1rem;font-size:.85rem;color:rgba(255,255,255,.55);min-height:1.4em}
+.status.error{color:#f87171}
+.status.success{color:#4afa4a}
+.progress-wrap{margin-top:1rem;display:none}
+.progress-bar{width:100%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:#6a8afa;border-radius:2px;width:0%;transition:width 1s ease}
+.poll-status{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.4rem}
+.preview-wrap{margin-top:2rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden;display:none}
+.preview-bar{background:rgba(255,255,255,.05);padding:.6rem 1rem;font-size:.75rem;color:rgba(255,255,255,.4);display:flex;justify-content:space-between;align-items:center}
+iframe{width:100%;height:600px;border:none;background:#fff}
+.method-note{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6}
+.method-note strong{color:#fff}
+.config{background:rgba(255,100,100,.06);border:1px solid rgba(255,100,100,.15);border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:.82rem;color:rgba(255,200,200,.7);line-height:1.8}
+.config strong{color:#fca5a5}
+.config code{background:rgba(255,255,255,.08);padding:.1rem .4rem;border-radius:3px;font-size:.8rem}
+</style>
+</head>
+<body>
+<h1>AI4 Website Design Studio</h1>
+<div class="badge">Powered by Claude AI · Unique Every Time</div>
+
+<div class="method-note">
+  <strong>How it works:</strong> Fill in your business details → click Generate → Claude AI builds your unique site in the background → preview appears automatically when ready. Usually 20–40 seconds.
+</div>
+
+
+
+<div class="form">
+  <div>
+    <label>Business Name</label>
+    <input id="q_name" type="text" placeholder="e.g. Mitchell's Auto Repair">
+  </div>
+  <div>
+    <label>What does your business do?</label>
+    <textarea id="q_what" placeholder="Describe your products or services..."></textarea>
+  </div>
+  <div>
+    <label>Who are your ideal customers?</label>
+    <textarea id="q_who" placeholder="Who do you serve best?"></textarea>
+  </div>
+  <div>
+    <label>What makes you different from competitors?</label>
+    <textarea id="q_diff" placeholder="What sets you apart?"></textarea>
+  </div>
+  <div>
+    <label>Anything else visitors should know?</label>
+    <textarea id="q_else" placeholder="Promotions, hours, awards..."></textarea>
+  </div>
+  <div class="grid2">
+    <div><label>Business Phone</label><input id="c_phone" type="tel" placeholder="(702) 555-0100"></div>
+    <div><label>Business Email</label><input id="c_email" type="email" placeholder="hello@yourbusiness.com"></div>
+  </div>
+  <div><label>Business Address</label><input id="c_addr" placeholder="123 Main St, Las Vegas, NV 89101"></div>
+  <div class="grid2">
+    <div><label>Business URL</label><input id="c_site" type="url" placeholder="https://yourbusiness.com"></div>
+    <div><label>Facebook</label><input id="c_facebook" type="url" placeholder="https://facebook.com/..."></div>
+  </div>
+  <div class="grid2">
+    <div><label>Instagram</label><input id="c_instagram" type="url" placeholder="https://instagram.com/..."></div>
+    <div><label>TikTok</label><input id="c_tiktok" type="url" placeholder="https://tiktok.com/@..."></div>
+  </div>
+  <div class="grid2">
+    <div><label>YouTube</label><input id="c_youtube" type="url" placeholder="https://youtube.com/@..."></div>
+    <div><label>LinkedIn</label><input id="c_linkedin" type="url" placeholder="https://linkedin.com/in/..."></div>
+  </div>
+  <button class="btn" id="goBtn" onclick="generate()">Generate My Website →</button>
+  <div class="status" id="status"></div>
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="poll-status" id="pollStatus">Waiting for Claude…</div>
+  </div>
+</div>
+
+<div class="preview-wrap" id="previewWrap">
+  <div class="preview-bar">
+    <span id="previewLabel">Preview</span>
+    <button onclick="downloadSite()" style="background:rgba(255,255,255,.1);color:#fff;border:none;padding:.35rem .8rem;border-radius:4px;font-size:.75rem;cursor:pointer">Download HTML</button>
+  </div>
+  <iframe id="frame"></iframe>
+</div>
+
+<script>
+// ── CONFIG — update these with your actual values ──
+const SUPABASE_URL  = 'https://judislfknmhofcgzyozc.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+const BG_ENDPOINT   = '/api/generate-bg';   // your background function endpoint
+const POLL_INTERVAL = 3000;                  // check every 3 seconds
+const MAX_POLLS     = 60;                    // give up after 3 minutes
+// ────────────────────────────────────────────────
+
+const $ = id => document.getElementById(id);
+let generatedHTML = '';
+let pollTimer = null;
+
+function readAnswers() {
+  const v = id => { const el = $(id); return el ? el.value.trim() : ''; };
+  return {
+    name:      v('q_name') || 'Your Business',
+    what:      v('q_what'),
+    who:       v('q_who'),
+    diff:      v('q_diff'),
+    else:      v('q_else'),
+    phone:     v('c_phone'),
+    email:     v('c_email'),
+    addr:      v('c_addr'),
+    site:      v('c_site'),
+    facebook:  v('c_facebook'),
+    instagram: v('c_instagram'),
+    tiktok:    v('c_tiktok'),
+    youtube:   v('c_youtube'),
+    linkedin:  v('c_linkedin'),
+  };
+}
+
+async function generate() {
+  const a = readAnswers();
+  const btn = $('goBtn');
+  const status = $('status');
+
+  btn.disabled = true;
+  btn.textContent = 'Starting…';
+  status.className = 'status';
+  status.textContent = 'Submitting your brief to Claude…';
+  $('progressWrap').style.display = 'block';
+  $('progressFill').style.width = '5%';
+  $('pollStatus').textContent = 'Sending brief…';
+  generatedHTML = '';
+
+  try {
+    // Step 1: Submit to background function — returns job_id immediately
+    const res = await fetch(BG_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({answers: a})
+    });
+
+    if (!res.ok) throw new Error('Submit failed: ' + res.status);
+    const {jobId} = await res.json();
+
+    if (!jobId) throw new Error('No job ID returned');
+
+    status.textContent = 'Job started — Claude is building your site…';
+    btn.textContent = 'Building…';
+    $('progressFill').style.width = '15%';
+    $('pollStatus').textContent = `Job ID: ${jobId} — checking every 3s…`;
+
+    // Step 2: Poll Supabase for result
+    let polls = 0;
+    pollTimer = setInterval(async () => {
+      polls++;
+      const pct = Math.min(15 + (polls / MAX_POLLS) * 80, 94);
+      $('progressFill').style.width = pct + '%';
+      $('pollStatus').textContent = `Check ${polls}/${MAX_POLLS} — waiting for Claude…`;
+
+      try {
+        const pollRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/site_jobs?id=eq.${jobId}&select=status,html`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        );
+        const rows = await pollRes.json();
+        const job = rows[0];
+
+        if (!job) return;
+
+        if (job.status === 'done' && job.html) {
+          clearInterval(pollTimer);
+          $('progressFill').style.width = '100%';
+          generatedHTML = job.html;
+          $('frame').srcdoc = job.html;
+          $('previewWrap').style.display = 'block';
+          $('previewLabel').textContent = a.name + ' — preview';
+          status.className = 'status success';
+          status.textContent = '✓ Your website is ready!';
+          btn.textContent = 'Generate Again →';
+          btn.disabled = false;
+          $('pollStatus').textContent = `Completed in ${polls * 3}s`;
+        } else if (job.status === 'error') {
+          clearInterval(pollTimer);
+          throw new Error('Generation failed on server');
+        } else if (polls >= MAX_POLLS) {
+          clearInterval(pollTimer);
+          throw new Error('Timed out — Claude took longer than 3 minutes');
+        }
+      } catch(pollErr) {
+        if (polls >= MAX_POLLS) {
+          clearInterval(pollTimer);
+          status.className = 'status error';
+          status.textContent = '⚠ ' + pollErr.message;
+          btn.disabled = false;
+          btn.textContent = 'Try Again →';
+        }
+      }
+    }, POLL_INTERVAL);
+
+  } catch(err) {
+    clearInterval(pollTimer);
+    status.className = 'status error';
+    status.textContent = '⚠ ' + (err.message || 'Failed. Try again.');
+    btn.disabled = false;
+    btn.textContent = 'Generate My Website →';
+    $('progressWrap').style.display = 'none';
+  }
+}
+
+function downloadSite() {
+  if (!generatedHTML) return;
+  const a = document.createElement('a');
+  a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(generatedHTML);
+  a.download = ($('q_name').value.trim() || 'my-website').toLowerCase().replace(/\s+/g,'-') + '.html';
+  a.click();
+}
+</script>
+</body>
+</html>
