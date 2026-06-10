@@ -1,0 +1,23 @@
+# netlify.toml
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions."generate"]
+  timeout = 26
+
+[functions."generate-bg"]
+  timeout = 900
+
+[[redirects]]
+  from = "/api/generate"
+  to = "/.netlify/functions/generate"
+  status = 200
+
+[[redirects]]
+  from = "/api/generate-bg"
+  to = "/.netlify/functions/generate-bg"
+  status = 200
