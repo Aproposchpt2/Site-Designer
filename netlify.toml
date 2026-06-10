@@ -21,3 +21,8 @@
   from = "/api/generate-bg"
   to = "/.netlify/functions/generate-bg"
   status = 200
+
+[[redirects]]
+  from = "/api/check-job"
+  to = "/.netlify/functions/check-job"
+  status = 200
