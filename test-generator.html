@@ -175,7 +175,7 @@ async function generate() {
 
       try {
         const pollRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/site_jobs?id=eq.${jobId}&select=status,html`,
+          `${SUPABASE_URL}/rest/v1/ai4_site_builds?id=eq.${jobId}&select=status,html`,
           { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
         );
         const rows = await pollRes.json();
