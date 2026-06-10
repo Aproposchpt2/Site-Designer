@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI4 · Promo Site Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Serif:ital@0;1&family=Sora:wght@300;400;500;600;700;800&family=Jost:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0B0E14; --panel:#11151F; --panel-2:#161B27; --line:rgba(255,255,255,.09);
+    --ink:#E9EDF5; --ink-soft:#9AA5BC; --ink-faint:#5E6A82;
+    --accent:#5BE6C8; --accent-2:#7C9CFF; --ui:'Sora',-apple-system,sans-serif;
+  }
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-weight:300;
+    display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  header.eng{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel);flex-shrink:0}
+  .eng .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+  .eng .logo-dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(140deg,var(--accent),var(--accent-2));
+    box-shadow:0 0 22px -4px var(--accent);display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;color:#06210b}
+  .eng .brand small{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-faint)}
+  .eng .tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+  .stage{display:grid;grid-template-columns:392px 1fr;flex:1;min-height:0}
+  @media(max-width:880px){.stage{grid-template-columns:1fr;overflow:auto}}
+  .panel{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:22px}
+  .step{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+  .panel h2{font-weight:700;font-size:19px;letter-spacing:-.01em;margin-bottom:4px}
+  .panel .sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:12px;font-weight:500;margin-bottom:6px}
+  .field textarea,.field input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:var(--ui);font-size:13px;font-weight:300;padding:10px 12px;resize:vertical;line-height:1.45;transition:border-color .2s}
+  .field textarea{min-height:62px}
+  .field textarea:focus,.field input:focus{outline:none;border-color:var(--accent)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .actions{position:sticky;bottom:-22px;background:linear-gradient(180deg,transparent,var(--panel) 30%);padding:18px 0 4px;margin-top:6px}
+  .btn{width:100%;border:none;border-radius:11px;padding:14px;font-family:var(--ui);font-weight:600;font-size:14px;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s}
+  .btn-primary{color:#06210b;background:linear-gradient(100deg,var(--accent),var(--accent-2));box-shadow:0 12px 34px -12px var(--accent)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 44px -12px var(--accent)}
+  .btn-primary:disabled{opacity:.55;cursor:wait;transform:none}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+  .btn-ghost{background:var(--panel-2);border:1px solid var(--line);color:var(--ink);font-weight:500;font-size:12.5px;padding:11px}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-select{background:#fff;color:#061a09;font-weight:800;margin-top:16px;border:2px solid var(--accent);display:none;letter-spacing:.01em}
+  .btn-select:hover{transform:translateY(-2px);box-shadow:0 14px 38px -10px rgba(100,255,150,.35)}
+  .btn-select:disabled{opacity:.6;cursor:wait;transform:none}
+  .hint{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);text-align:center;margin-top:11px;letter-spacing:.04em;line-height:1.5}
+  .preview{position:relative;background:#05070b;min-height:0;display:flex;flex-direction:column}
+  .pv-bar{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-shrink:0}
+  .pv-dots{display:flex;gap:6px}.pv-dots i{width:10px;height:10px;border-radius:50%;background:#2b3242;display:block}
+  .pv-url{flex:1;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:5px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pv-style{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(91,230,200,.3);border-radius:30px;padding:4px 11px;white-space:nowrap}
+  .pv-style .sw{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.4)}
+  .frame-wrap{flex:1;position:relative;min-height:0}
+  iframe{width:100%;height:100%;border:0;background:#fff;display:block}
+  .empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--ink-faint);text-align:center;padding:30px}
+  .empty .big{font-family:'Bodoni Moda',serif;font-size:30px;color:var(--ink-soft)}
+  .empty .sm{font-size:13px;max-width:36ch;line-height:1.6}
+  .spinner{width:38px;height:38px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .pulse{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--ink-soft)}
+  .err{color:#FF8B7A;font-size:12.5px;max-width:42ch;line-height:1.6}
+</style>
+</head>
+<body>
+<header class="eng">
+  <div class="brand"><span class="logo-dot">A4</span> Promo Site Engine <small>generative · by AI4</small></div>
+  <div class="tag">Intake → AI Copy + AI Design → Live Site</div>
+</header>
+<div class="stage">
+  <div class="panel">
+    <div class="step">Customer Intake · Tell us about your business</div>
+    <h2>7 questions</h2>
+    <p class="sub">The AI agent writes your copy and invents a completely unique design — palette, typography, layout — on every run. No two sites alike.</p>
+
+    <div class="field"><label>What is your business name?</label><input id="q_name" type="text" placeholder="e.g. Mitchell's Auto Repair"></div>
+    <div class="field"><label>What does your business do?</label><textarea id="q_what" placeholder="Describe your products or services in a few sentences..."></textarea></div>
+    <div class="field"><label>Short description of your ideal customers?</label><textarea id="q_who" placeholder="Who are the people or businesses you serve best?"></textarea></div>
+    <div class="field"><label>What makes you different from competitors?</label><textarea id="q_diff" placeholder="What sets you apart? Why should customers choose you?"></textarea></div>
+    <div class="field"><label>Anything else you want visitors to know?</label><textarea id="q_else" placeholder="Promotions, hours, awards, mission — anything that matters..."></textarea></div>
+
+    <div class="step" style="margin-top:12px">How can your business be contacted?</div>
+    <div class="grid2">
+      <div class="field"><label>Business Phone</label><input id="c_phone" type="tel" placeholder="(702) 555-0100"></div>
+      <div class="field"><label>Business Email Address</label><input id="c_email" type="email" placeholder="hello@yourbusiness.com"></div>
+    </div>
+    <div class="field"><label>Street Address, City, State and Zip Code</label><input id="c_addr" type="text" placeholder="2780 South Jones Blvd, Las Vegas, NV 89146"></div>
+    <div class="grid2">
+      <div class="field"><label>Facebook</label><input id="c_facebook" type="url" placeholder="https://facebook.com/yourbusiness"></div>
+      <div class="field"><label>Instagram</label><input id="c_instagram" type="url" placeholder="https://instagram.com/yourbusiness"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>TikTok</label><input id="c_tiktok" type="url" placeholder="https://tiktok.com/@yourbusiness"></div>
+      <div class="field"><label>LinkedIn</label><input id="c_linkedin" type="url" placeholder="https://linkedin.com/in/yourname"></div>
+    </div>
+    <div class="field"><label>Business URL</label><input id="c_site" type="url" placeholder="https://yourbusiness.com"></div>
+    <div class="actions">
+      <button class="btn btn-primary" id="go">Generate site →</button>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="shuffle">🎲 New design</button>
+        <button class="btn btn-ghost" id="rewrite">✎ Rewrite copy</button>
+      </div>
+      <div class="hint" id="hint">Calls your Netlify function · Claude AI generates every site uniquely</div>
+      <button class="btn btn-select" id="selectBtn">Select this site &rarr; Continue to purchase</button>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="pv-bar">
+      <div class="pv-dots"><i></i><i></i><i></i></div>
+      <div class="pv-url" id="pvurl">about:blank</div>
+      <div class="pv-style" id="pvstyle" style="display:none"></div>
+    </div>
+    <div class="frame-wrap">
+      <iframe id="frame" title="Generated site preview"></iframe>
+      <div class="empty" id="empty">
+        <div class="big">No site yet.</div>
+        <div class="sm">Hit <b style="color:var(--accent)">Generate site</b>. The agent writes the copy and designs a one-of-a-kind look from scratch.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   PROMO SITE ENGINE — Claude-First Edition
+   intake -> Netlify function -> Claude generates complete unique HTML
+   No templates. No fallbacks. Every site is one-of-a-kind.
+   ===================================================================== */
+
+const FN_ENDPOINT = "/.netlify/functions/generate"; // your server step (holds the key)
+
+const SAMPLE={
+  name:"FlowDesk Pro",
+  what:"AI4 Businesses builds practical automation systems that help businesses modernize how they handle calls, leads, customer intake, and follow-up. From smart auto-attendants to lead management dashboards and intake workflows, we help businesses respond faster, stay organized, and create a more professional customer experience.",
+  who:"Business owners and teams ready to modernize how they handle calls, leads, customer intake, and follow-up — who want practical automation that saves time and reduces missed opportunities without adding staff or complexity.",
+  diff:"Our focus is not flashy technology alone — it is building usable systems that improve how a business actually operates: capturing missed opportunities, organizing customer information, supporting faster response, and creating a more professional experience.",
+  else:"Every system we build helps your business operate with more structure, speed, and confidence — turning everyday activity into organized, actionable workflows.",
+  site:"aiflowdeskpro.com", email:"jmitchell@ai4businesses.com", addr:"2780 South Jones Boulevard, Las Vegas, NV 89146"
+};
+const $=id=>document.getElementById(id);
+function fill(){
+  // Pre-fill from URL params set by signup (m=userId, e=email, n=name)
+  const p=new URLSearchParams(location.search);
+  const em=p.get('e')?decodeURIComponent(p.get('e')):'';
+  if(em) $("c_email").value=em;
+  // Business questions are left blank — this is their site, their words
+}
+fill();
+
+// ── Passthrough from ai4-design-studio questionnaire ──
+(function(){
+  var ptMode = new URLSearchParams(location.search).get('mode');
+  if (ptMode !== 'passthrough') return;
+  try {
+    var _raw=new URLSearchParams(location.search).get('d')||'';var pt={};try{if(_raw)pt=JSON.parse(decodeURIComponent(escape(atob(_raw))));}catch(ex2){}
+    if (pt.name) { var n=$("q_name"); if(n) n.value=pt.name; }
+    if (pt.what) { var w=$("q_what"); if(w) w.value=pt.what; }
+    if (pt.who)  { var o=$("q_who");  if(o) o.value=pt.who;  }
+    if (pt.diff) { var d=$("q_diff"); if(d) d.value=pt.diff; }
+    if (pt.else) { var e=$("q_else"); if(e) e.value=pt.else; }
+    // Hide intake form and expand preview to full width
+    // Hide form fields, keep action buttons
+    var toHide = document.querySelectorAll('.panel .field, .panel .step, .panel .sub, .panel h2, .panel .grid2');
+    toHide.forEach(function(el){ el.style.display='none'; });
+    var panel = document.querySelector('.panel');
+    var stage = document.querySelector('.stage');
+    if (panel){ panel.style.maxWidth='190px'; panel.style.padding='12px 10px'; }
+    if (stage) stage.style.gridTemplateColumns='190px 1fr';
+    // Fire Claude immediately
+    setTimeout(function(){ generate(true,true); }, 150);
+  } catch(ex) { console.warn('Passthrough error',ex); }
+})();
+function readAnswers(){
+  const v=id=>{const el=$(id);return el?el.value.trim():"";};
+  return {
+    name:    v("q_name")||"Your Business",
+    what:    v("q_what"),
+    who:     v("q_who"),
+    diff:    v("q_diff"),
+    else:    v("q_else"),
+    phone:   v("c_phone"),
+    email:   v("c_email"),
+    addr:    v("c_addr"),
+    facebook:v("c_facebook"),
+    instagram:v("c_instagram"),
+    tiktok:  v("c_tiktok"),
+    linkedin:v("c_linkedin"),
+    site:v("c_site"),
+  };
+}
+const esc=s=>(s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* curated font palette the renderer can rely on (loaded in this page + injected into each site) */
+// FONT_LINK removed — Claude picks fonts per-site
+async function viaFunction(answers, mode, existingContent){
+  const res = await fetch(FN_ENDPOINT, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({answers, mode, existingContent: existingContent || null})
+  });
+  if (!res.ok) throw new Error("fn " + res.status);
+  const data = await res.json();
+  if (!data.html) throw new Error("no html returned");
+  return data;
+}
+
+
+/* ── UI helpers ── */
+let cur = null;
+
+function busy(on){
+  const go=$("go"), rw=$("rewrite"), sh=$("shuffle");
+  [go,rw,sh].forEach(b=>{ if(b){ b.disabled=on; }});
+  if(go) go.textContent = on ? "Generating…" : "Generate site →";
+  $("hint").textContent = on ? "Claude AI is designing your site…" : $("hint").textContent;
+}
+
+function render(){
+  if(!cur || !cur.html) return;
+  const frame=$("frame");
+  const empty=$("empty");
+  if(empty) empty.style.display="none";
+  if(frame){
+    frame.srcdoc = cur.html;
+    $("pvurl").textContent = (cur.content && cur.content.brand) ? cur.content.brand + " — preview" : "preview";
+  }
+}
+
+async function obtain(answers,mode,existingContent){
+  // Claude-only. No template fallbacks. Every site is one-of-a-kind.
+  try {
+    const r = await viaFunction(answers, mode, existingContent);
+    return {...r, via:"Claude AI"};
+  } catch(err) {
+    busy(false);
+    $("hint").textContent = "⚠ Generation failed — check your connection and try again.";
+    throw err;
+  }
+}
+async function generate(newCopy,newDesign){
+  const a=readAnswers(); busy(true);
+  const existing=(!newCopy&&cur&&cur.content)?cur.content:null;
+  const r=await obtain(a,newCopy?"full":"design",existing);
+  if(!cur) cur={};
+  cur.html=r.html;
+  if(newCopy||!cur.content){ cur.content=r.content; if(cur.content)cur.content.contact={phone:a.phone,email:a.email,addr:a.addr,facebook:a.facebook,instagram:a.instagram,tiktok:a.tiktok,linkedin:a.linkedin}; }
+  $("hint").textContent="✓ via "+r.via;
+  busy(false); render();
+}
+$("go").addEventListener("click",()=>generate(true,true));
+$("rewrite").addEventListener("click",()=>generate(true,false));
+$("shuffle").addEventListener("click",()=>{ if(!cur){generate(true,true);return;} generate(false,true); });
+
+/* ── SELECT THIS SITE → PURCHASE ── */
+async function selectAndCheckout(){
+  if(!cur){alert("Generate a site first — hit Generate site → above.");return;}
+  const p=new URLSearchParams(location.search);
+  const userId=p.get('m')||'';
+  const email=p.get('e')?decodeURIComponent(p.get('e')):'';
+  const name=p.get('n')?decodeURIComponent(p.get('n')):'';
+  const ssEmail=(function(){try{return sessionStorage.getItem('ai4_email')||sessionStorage.getItem('user_email')||'';}catch(e){return '';}})();
+  const email_=email||ssEmail;
+  if(!email_){alert("Please sign up first — return to ai4websitedesign.com.");return;}
+  const btn=$("selectBtn");
+  btn.disabled=true; btn.textContent="Saving your site…";
+  try{
+    const answers=readAnswers();
+    const html=cur.html||"";
+    // 1. Persist the chosen site before leaving this page
+    const saveRes=await fetch("https://ai4websitedesign.com/.netlify/functions/save-build",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email:email_, user_id:userId, full_name:name,
+        business_name:answers.name||"Website Build",
+        built_html:html,
+        site_data:{content:cur.content,design:cur.design,answers},
+        template_selected:(cur.design&&cur.design.layout)||"ENGINE",
+        color_choice:(cur.design&&cur.design.palette&&cur.design.palette.accent)||"AUTO"
+      })
+    });
+    const saved=await saveRes.json();
+    if(!saved.success) throw new Error(saved.error||"Could not save your site.");
+    const siteId=saved.site_id;
+    // 2. Send OTP access code to user's email (non-fatal if it fails)
+    btn.textContent="Sending your access code…";
+    await fetch("https://ai4websitedesign.com/.netlify/functions/send-otp",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email:email_})
+    }).catch(()=>{});
+    // 3. Redirect to product purchasing site with site reference
+    btn.textContent="✓ Check your email for your access code";
+    setTimeout(()=>{
+      const ptLang=new URLSearchParams(location.search).get('lang')||'en';
+    const intakePath=ptLang==='es'?'/Website-signup-intake-es.html':'/Website-signup-intake';
+    const url=new URL("https://ai4-product-purchasing.ai4businesses.org"+intakePath);
+      url.searchParams.set("site",siteId);
+      url.searchParams.set("e",encodeURIComponent(email_));
+      location.href=url.toString();
+    },1800);
+  }catch(err){
+    console.error("Select error:",err);
+    btn.disabled=false; btn.textContent="Select this site → Continue to purchase";
+    alert(err.message||"Could not save your site. Please try again.");
+  }
+}
+$("selectBtn").addEventListener("click",selectAndCheckout);
+</script>
+</body>
+</html>
+
