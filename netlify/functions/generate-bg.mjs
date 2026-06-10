@@ -60,7 +60,7 @@ Return ONLY the complete HTML. Start with <!DOCTYPE html>. No explanation. No ma
 }
 
 async function createJob(jobId, answers) {
-  const res = await fetch(`${SUP_URL}/rest/v1/site_jobs`, {
+  const res = await fetch(`${SUP_URL}/rest/v1/ai4_site_builds`, {
     method: "POST",
     headers: {
       "Content-Type":  "application/json",
@@ -74,7 +74,7 @@ async function createJob(jobId, answers) {
 }
 
 async function updateJob(jobId, status, html = null) {
-  await fetch(`${SUP_URL}/rest/v1/site_jobs?id=eq.${jobId}`, {
+  await fetch(`${SUP_URL}/rest/v1/ai4_site_builds?id=eq.${jobId}`, {
     method: "PATCH",
     headers: {
       "Content-Type":  "application/json",
